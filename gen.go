@@ -17,10 +17,7 @@ func Ints(start, delta int) iter.Seq[int] {
 // Repeat produces an infinite iterator repeatedly containing the given value.
 func Repeat[T any](val T) iter.Seq[T] {
 	return func(yield func(T) bool) {
-		for {
-			if !yield(val) {
-				return
-			}
+		for yield(val) {
 		}
 	}
 }

@@ -27,6 +27,25 @@ func ExampleAccum() {
 	// 15
 }
 
+func ExampleBytes() {
+	const s = "Hello世界"
+	for b := range seqs.Bytes(s) {
+		fmt.Println(b)
+	}
+	// Output:
+	// 72
+	// 101
+	// 108
+	// 108
+	// 111
+	// 228
+	// 184
+	// 150
+	// 231
+	// 149
+	// 140
+}
+
 func ExampleDup() {
 	var (
 		ints       = seqs.Ints(1, 1)       // All integers starting at 1
@@ -42,6 +61,20 @@ func ExampleDup() {
 	// Output:
 	// [2 4 6 8 10]
 	// [1 3 5 7 9]
+}
+
+func ExampleEnumerate() {
+	var (
+		strs = slices.Values([]string{"a", "b", "c"})
+		seq  = seqs.Enumerate(strs)
+	)
+	for i, s := range seq {
+		fmt.Println(i, s)
+	}
+	// Output:
+	// 0 a
+	// 1 b
+	// 2 c
 }
 
 func ExampleGo() {
@@ -60,20 +93,15 @@ func ExampleGo() {
 	// [1 2 3]
 }
 
-func ExampleZip() {
+func ExampleLeft() {
 	var (
-		letters = slices.Values([]string{"a", "b", "c", "d"})
-		nums    = slices.Values([]int{1, 2, 3})
-		pairs   = seqs.Zip(letters, nums)
+		pairs = []seqs.Pair[int, string]{{X: 1, Y: "a"}, {X: 2, Y: "b"}, {X: 3, Y: "c"}}
+		seq   = seqs.FromPairs(slices.Values(pairs))
+		nums  = seqs.Left(seq)
 	)
-	for x, y := range pairs {
-		fmt.Println(x, y)
-	}
+	fmt.Println(slices.Collect(nums))
 	// Output:
-	// a 1
-	// b 2
-	// c 3
-	// d 0
+	// [1 2 3]
 }
 
 func ExamplePages() {
@@ -127,4 +155,71 @@ func ExamplePartition() {
 	// 0 [0 3 6 9]
 	// 1 [1 4 7]
 	// 2 [2 5 8]
+}
+
+func ExampleRight() {
+	var (
+		pairs = []seqs.Pair[int, string]{{X: 1, Y: "a"}, {X: 2, Y: "b"}, {X: 3, Y: "c"}}
+		seq   = seqs.FromPairs(slices.Values(pairs))
+		strs  = seqs.Right(seq)
+	)
+	fmt.Println(slices.Collect(strs))
+	// Output:
+	// [a b c]
+}
+
+func ExampleRunes() {
+	const s = "Hello世界"
+	for r := range seqs.Runes(s) {
+		fmt.Println(string(r))
+	}
+	// Output:
+	// H
+	// e
+	// l
+	// l
+	// o
+	// 世
+	// 界
+}
+
+func ExampleString() {
+	const s = "Hello世界"
+	for i, r := range seqs.String(s) {
+		fmt.Printf("%d %c\n", i, r)
+	}
+	// Output:
+	// 0 H
+	// 1 e
+	// 2 l
+	// 3 l
+	// 4 o
+	// 5 世
+	// 8 界
+}
+
+func ExampleUniq() {
+	var (
+		nums = slices.Values([]int{1, 1, 2, 2, 2, 3})
+		uniq = seqs.Uniq(nums)
+	)
+	fmt.Println(slices.Collect(uniq))
+	// Output:
+	// [1 2 3]
+}
+
+func ExampleZip() {
+	var (
+		letters = slices.Values([]string{"a", "b", "c", "d"})
+		nums    = slices.Values([]int{1, 2, 3})
+		pairs   = seqs.Zip(letters, nums)
+	)
+	for x, y := range pairs {
+		fmt.Println(x, y)
+	}
+	// Output:
+	// a 1
+	// b 2
+	// c 3
+	// d 0
 }

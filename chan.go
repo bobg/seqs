@@ -111,3 +111,20 @@ func Go[T any, F ~func(chan<- T) error](f F) (iter.Seq[T], *error) {
 
 	return FromChan(ch), &err
 }
+
+// Go2 runs a function in a goroutine and returns an iterator over the pairs of values it produces.
+// The function receives a channel for producing pairs.
+// The channel closes when the function exits.
+func Go2[T, U any, F ~func(chan<- Pair[T, U]) error](f F) (iter.Seq2[T, U], *error) {
+	var (
+		ch  = make(chan Pair[T, U])
+		err error
+	)
+
+	go func() {
+		err = f(ch)
+		close(ch)
+	}()
+
+	return FromPairs(FromChan(ch)), &err
+}

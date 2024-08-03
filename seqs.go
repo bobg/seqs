@@ -79,6 +79,9 @@ func FromPairs[T, U any](inp iter.Seq[Pair[T, U]]) iter.Seq2[T, U] {
 // If a ends before b, Compare returns -1.
 // If b ends before a, Compare returns 1.
 // If the sequences are equal, Compare returns 0.
+//
+// Compare consumes as much of the input sequences as necessary to determine the result.
+// If the sequences are equal and infinite, Compare will not terminate.
 func Compare[T cmp.Ordered](a, b iter.Seq[T]) int {
 	return CompareFunc(a, b, cmp.Compare)
 }
@@ -92,6 +95,9 @@ func Compare[T cmp.Ordered](a, b iter.Seq[T]) int {
 // If a ends before b, CompareFunc returns -1.
 // If b ends before a, CompareFunc returns 1.
 // If the sequences are equal, CompareFunc returns 0.
+//
+// CompareFunc consumes as much of the input sequences as necessary to determine the result.
+// If the sequences are equal and infinite, CompareFunc will not terminate.
 func CompareFunc[T any](a, b iter.Seq[T], f func(T, T) int) int {
 	anext, astop := iter.Pull(a)
 	defer astop()
@@ -134,3 +140,23 @@ func Empty[T any](func(T) bool) {}
 // Usage note: you generally don't want to call this function,
 // just refer to it as Empty2[typename1, typename2].
 func Empty2[T, U any](func(T, U) bool) {}
+
+// Drain consumes all the elements of a sequence and returns the number of elements consumed.
+// If the sequence is infinite, Drain will not terminate.
+func Drain[T any](inp iter.Seq[T]) int {
+	var n int
+	for range inp {
+		n++
+	}
+	return n
+}
+
+// Drain2 consumes all the elements of a sequence and returns the number of elements consumed.
+// If the sequence is infinite, Drain2 will not terminate.
+func Drain2[T, U any](inp iter.Seq2[T, U]) int {
+	var n int
+	for range inp {
+		n++
+	}
+	return n
+}
