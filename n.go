@@ -2,27 +2,51 @@ package seqs
 
 import "iter"
 
-// FirstN produces an iterator containing the first n elements of the input
+// FirstN produces a sequence containing the first n elements of the input
 // (or all of the input, if there are fewer than n elements).
 // Remaining elements of the input are not consumed.
-// It is the caller's responsibility to release any associated resources.
 func FirstN[T any](inp iter.Seq[T], n int) iter.Seq[T] {
 	return func(yield func(T) bool) {
-		for i, val := range Enumerate(inp) {
-			if i >= n {
+		next, stop := iter.Pull(inp)
+		defer stop()
+
+		for n > 0 {
+			val, ok := next()
+			if !ok {
 				return
 			}
 			if !yield(val) {
 				return
 			}
+			n--
 		}
 	}
 }
 
-// LastN produces a slice containing the last n elements of the input iterator
+// FirstN2 produces a sequence containing the first n elements of the input
 // (or all of the input, if there are fewer than n elements).
-// There is no guarantee that any elements will ever be produced:
-// the input iterator may be infinite!
+// Remaining elements of the input are not consumed.
+func FirstN2[T, U any](inp iter.Seq2[T, U], n int) iter.Seq2[T, U] {
+	return func(yield func(T, U) bool) {
+		next, stop := iter.Pull2(inp)
+		defer stop()
+
+		for n > 0 {
+			x, y, ok := next()
+			if !ok {
+				return
+			}
+			if !yield(x, y) {
+				return
+			}
+			n--
+		}
+	}
+}
+
+// LastN produces a slice containing the last n elements of the input
+// (or all of the input, if there are fewer than n elements).
+// If the input is infinite, LastN will never return.
 func LastN[T any, S ~func(func(T) bool)](inp S, n int) []T {
 	var (
 		buf   = make([]T, 0, n)
@@ -44,11 +68,48 @@ func LastN[T any, S ~func(func(T) bool)](inp S, n int) []T {
 // skipping the first N elements.
 func SkipN[T any](inp iter.Seq[T], n int) iter.Seq[T] {
 	return func(yield func(T) bool) {
-		for i, val := range Enumerate(inp) {
-			if i < n {
-				continue
+		next, stop := iter.Pull(inp)
+		defer stop()
+
+		for n > 0 {
+			if _, ok := next(); !ok {
+				return
+			}
+			n--
+		}
+
+		for {
+			val, ok := next()
+			if !ok {
+				return
 			}
 			if !yield(val) {
+				return
+			}
+		}
+	}
+}
+
+// SkipN2 copies the input iterator to the output,
+// skipping the first N elements.
+func SkipN2[T, U any](inp iter.Seq2[T, U], n int) iter.Seq2[T, U] {
+	return func(yield func(T, U) bool) {
+		next, stop := iter.Pull2(inp)
+		defer stop()
+
+		for n > 0 {
+			if _, _, ok := next(); !ok {
+				return
+			}
+			n--
+		}
+
+		for {
+			x, y, ok := next()
+			if !ok {
+				return
+			}
+			if !yield(x, y) {
 				return
 			}
 		}

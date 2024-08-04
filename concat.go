@@ -17,3 +17,18 @@ func Concat[T any](inps ...iter.Seq[T]) iter.Seq[T] {
 		}
 	}
 }
+
+func Concat2[T, U any](inps ...iter.Seq2[T, U]) iter.Seq2[T, U] {
+	return func(yield func(T, U) bool) {
+		for _, inp := range inps {
+			if inp == nil {
+				continue
+			}
+			for x, y := range inp {
+				if !yield(x, y) {
+					return
+				}
+			}
+		}
+	}
+}

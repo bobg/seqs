@@ -125,3 +125,32 @@ func TestCompare(t *testing.T) {
 		}
 	})
 }
+
+func TestDrain(t *testing.T) {
+	var (
+		ints  = Ints(0, 1)
+		first = FirstN(ints, 10)
+	)
+	Drain(first)
+	got := slices.Collect(first)
+	if len(got) != 0 {
+		t.Errorf("got %v, want []", got)
+	}
+}
+
+func TestDrain2(t *testing.T) {
+	var (
+		intsA  = Ints(0, 1)
+		intsB  = Ints(0, 1)
+		zipped = Zip(intsA, intsB)
+		first  = FirstN2(zipped, 10)
+	)
+	Drain2(first)
+	var (
+		pairs = ToPairs(first)
+		got   = slices.Collect(pairs)
+	)
+	if len(got) != 0 {
+		t.Errorf("got %v, want []", got)
+	}
+}

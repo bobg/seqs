@@ -7,8 +7,30 @@ import (
 	"iter"
 )
 
-// Lines produces an iterator over the lines of text in r.
-// This uses a bufio.Scanner
+// Words produces the sequence of words in r,
+// as determined by [bufio.ScanWords].
+//
+// The caller can dereference the returned error pointer to check for errors
+// but only after iteration is done.
+func Words(r io.Reader) (iter.Seq[string], *error) {
+	var err error
+
+	f := func(yield func(string) bool) {
+		sc := bufio.NewScanner(r)
+		sc.Split(bufio.ScanWords)
+		for sc.Scan() {
+			if !yield(sc.Text()) {
+				return
+			}
+		}
+		err = sc.Err()
+	}
+
+	return f, &err
+}
+
+// Lines produces the sequence of text lines in r.
+// This uses a [bufio.Scanner]
 // and is subject to its default line-length limit
 // (see https://pkg.go.dev/bufio#pkg-constants).
 //

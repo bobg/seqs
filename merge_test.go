@@ -10,7 +10,7 @@ func TestMerge(t *testing.T) {
 		mod0   = slices.Values([]int{3, 6, 9})
 		mod1   = slices.Values([]int{1, 4, 7, 10})
 		mod2   = slices.Values([]int{2, 5, 8})
-		merged = Merge(mod0, mod1, mod2)
+		merged = Merge(mod0, mod1, mod2, Empty[int])
 		got    = slices.Collect(merged)
 		want   = []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	)
