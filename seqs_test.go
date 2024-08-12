@@ -76,7 +76,7 @@ func TestLeftRight(t *testing.T) {
 	var (
 		left   = []int{1, 2, 3, 4, 5}
 		right  = []int{6, 7, 8, 9, 10}
-		zipped = Zip(slices.Values(left), slices.Values(right))
+		zipped = ZipVals(slices.Values(left), slices.Values(right))
 	)
 	t.Run("left", func(t *testing.T) {
 		got := slices.Collect(Left(zipped))
@@ -129,7 +129,7 @@ func TestCompare(t *testing.T) {
 func TestDrain(t *testing.T) {
 	var (
 		ints  = Ints(0, 1)
-		first = FirstN(ints, 10)
+		first = Limit(ints, 10)
 	)
 	Drain(first)
 	got := slices.Collect(first)
@@ -142,8 +142,8 @@ func TestDrain2(t *testing.T) {
 	var (
 		intsA  = Ints(0, 1)
 		intsB  = Ints(0, 1)
-		zipped = Zip(intsA, intsB)
-		first  = FirstN2(zipped, 10)
+		zipped = ZipVals(intsA, intsB)
+		first  = Limit2(zipped, 10)
 	)
 	Drain2(first)
 	var (

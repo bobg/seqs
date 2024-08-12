@@ -16,3 +16,4 @@ The central type in that package,
 [iter.Of](https://pkg.go.dev/github.com/bobg/go-generics/v3/iter#Of),
 was made obsolete with the introduction of Go sequences.
 This library provides operations on sequences analogous to the ones on `iter.Of` in the old package.
+It combines those with [the proposal for an x/exp/iter package](https://github.com/golang/go/issues/61898).

@@ -19,7 +19,7 @@ func TestWords(t *testing.T) {
 	defer indep.Close()
 
 	words, errptr := Words(indep)
-	firstWords := FirstN(words, 10)
+	firstWords := Limit(words, 10)
 	got := slices.Collect(firstWords)
 	if err := *errptr; err != nil {
 		t.Fatal(err)

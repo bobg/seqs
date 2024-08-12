@@ -2,34 +2,26 @@ package seqs
 
 import "iter"
 
-// Filter copies the input iterator to the output,
-// including only those elements that cause f to return true.
-func Filter[T any, F ~func(T) bool](inp iter.Seq[T], f F) iter.Seq[T] {
-	return func(yield func(T) bool) {
-		for val := range inp {
-			if !f(val) {
-				continue
-			}
-			if !yield(val) {
+// Filter returns an iterator over seq that only includes
+// the values v for which f(v) is true.
+func Filter[V any, F ~func(V) bool](seq iter.Seq[V], f F) iter.Seq[V] {
+	return func(yield func(V) bool) {
+		for v := range seq {
+			if f(v) && !yield(v) {
 				return
 			}
 		}
 	}
 }
 
-// SkipUntil copies the input iterator to the output,
-// discarding the initial elements until the first one that causes f to return true.
-// That element and the remaining elements of inp are included in the output,
-// and f is not called again.
-func SkipUntil[T any, F ~func(T) bool](inp iter.Seq[T], f F) iter.Seq[T] {
-	skipping := true
-	return Filter(inp, func(val T) bool {
-		if !skipping {
-			return true
+// Filter2 returns an iterator over seq that only includes
+// the pairs k, v for which f(k, v) is true.
+func Filter2[K, V any, F ~func(K, V) bool](seq iter.Seq2[K, V], f F) iter.Seq2[K, V] {
+	return func(yield func(K, V) bool) {
+		for k, v := range seq {
+			if f(k, v) && !yield(k, v) {
+				return
+			}
 		}
-		if f(val) {
-			skipping = false
-		}
-		return !skipping
-	})
+	}
 }

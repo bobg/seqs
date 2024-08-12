@@ -10,7 +10,7 @@ import (
 func TestPartition(t *testing.T) {
 	var (
 		ints       = Ints(0, 1)
-		first10    = FirstN(ints, 10)
+		first10    = Limit(ints, 10)
 		partitions = Partition(first10, func(n int) int { return n % 3 })
 		mu         sync.Mutex
 		m          = make(map[int][]int)

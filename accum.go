@@ -2,51 +2,68 @@ package seqs
 
 import "iter"
 
-// Accum accumulates the result of repeatedly applying a simple function to the elements of an iterator.
-// If inp[i] is the ith element of the input
-// and out[i] is the ith element of the output,
-// then:
-//
-//	out[0] == inp[0]
-//
-// and
-//
-//	out[i+1] == f(out[i], inp[i+1])
-func Accum[T any, F ~func(T, T) T](inp iter.Seq[T], f F) iter.Seq[T] {
-	res, _ := Accumx(inp, func(a, b T) (T, error) {
-		return f(a, b), nil
+// Accum repeatedly applies a function to the elements of an iterator
+// and produces an iterator over the accumulated values.
+// On each call, the function receives the accumulated value and the next element of the input iterator.
+// The first call receives the initial value as the accumulated value.
+func Accum[T, A any, F ~func(A, T) A](inp iter.Seq[T], init A, f F) iter.Seq[A] {
+	seq, _ := Accumx(inp, init, func(acc A, t T) (A, error) {
+		return f(acc, t), nil
 	})
-	return res
+	return seq
 }
 
-// Accumx is the extended form of [Accum].
-// It accumulates the result of repeatedly applying a function to the elements of an iterator.
-// If inp[i] is the ith element of the input
-// and out[i] is the ith element of the output,
-// then:
-//
-//	out[0] == inp[0]
-//
-// and
-//
-//	out[i+1] == f(out[i], inp[i+1])
-//
-// The caller gets the resulting iterator and a non-nil pointer to an error.
-// After the iterator is fully consumed,
-// the caller may dereference the error pointer to check for any error that occurred during iteration.
-func Accumx[T any, F ~func(T, T) (T, error)](inp iter.Seq[T], f F) (iter.Seq[T], *error) {
-	var (
-		val T
-		err error
-	)
+// Accumx repeatedly applies a function to the elements of an iterator
+// and produces an iterator over the accumulated values,
+// plus a pointer to an error.
+// On each call, the function receives the accumulated value and the next element of the input iterator.
+// The first call receives the initial value as the accumulated value.
+// If the function returns an error, Accumx stops.
+// The error pointer that Accumx returns may be dereferenced to discover that error,
+// but only after the output iterator is fully consumed.
+func Accumx[T, A any, F ~func(A, T) (A, error)](inp iter.Seq[T], init A, f F) (iter.Seq[A], *error) {
+	var err error
 
-	seq := func(yield func(T) bool) {
-		for x := range inp {
-			val, err = f(val, x)
-			if err != nil {
+	seq := func(yield func(A) bool) {
+		acc := init
+		for val := range inp {
+			acc, err = f(acc, val)
+			if err != nil || !yield(acc) {
 				return
 			}
-			if !yield(val) {
+		}
+	}
+
+	return seq, &err
+}
+
+// Accum2 repeatedly applies a function to the elements of a pairwise iterator
+// and produces an iterator over the accumulated values.
+// On each call, the function receives the accumulated value and the next pair of elements from the input iterator.
+// The first call receives the initial value as the accumulated value.
+func Accum2[T, U, A any, F ~func(A, T, U) A](inp iter.Seq2[T, U], init A, f F) iter.Seq[A] {
+	seq, _ := Accum2x(inp, init, func(acc A, t T, u U) (A, error) {
+		return f(acc, t, u), nil
+	})
+	return seq
+}
+
+// Accum2x repeatedly applies a function to the elements of an iterator
+// and produces an iterator over the accumulated values,
+// plus a pointer to an error.
+// On each call, the function receives the accumulated value and the next pair of elements from the input iterator.
+// The first call receives the initial value as the accumulated value.
+// If the function returns an error, Accum2x stops.
+// The error pointer that Accum2x returns may be dereferenced to discover that error,
+// but only after the output iterator is fully consumed.
+func Accum2x[T, U, A any, F ~func(A, T, U) (A, error)](inp iter.Seq2[T, U], init A, f F) (iter.Seq[A], *error) {
+	var err error
+
+	seq := func(yield func(A) bool) {
+		acc := init
+		for t, u := range inp {
+			acc, err = f(acc, t, u)
+			if err != nil || !yield(acc) {
 				return
 			}
 		}

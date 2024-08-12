@@ -5,11 +5,11 @@ import (
 	"testing"
 )
 
-func TestFirstN(t *testing.T) {
+func TestLimit(t *testing.T) {
 	t.Run("long", func(t *testing.T) {
 		var (
 			ints  = Ints(0, 1)
-			first = FirstN(ints, 10)
+			first = Limit(ints, 10)
 			got   = slices.Collect(first)
 			want  = []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
 		)
@@ -21,7 +21,7 @@ func TestFirstN(t *testing.T) {
 	t.Run("short", func(t *testing.T) {
 		var (
 			ints  = slices.Values([]int{1, 2, 3})
-			first = FirstN(ints, 10)
+			first = Limit(ints, 10)
 			got   = slices.Collect(first)
 			want  = []int{1, 2, 3}
 		)
@@ -31,13 +31,13 @@ func TestFirstN(t *testing.T) {
 	})
 }
 
-func TestFirstN2(t *testing.T) {
+func TestLimit2(t *testing.T) {
 	t.Run("long", func(t *testing.T) {
 		var (
 			left   = Ints(0, 1)
 			right  = Ints(100, 1)
-			zipped = Zip(left, right)
-			first  = FirstN2(zipped, 10)
+			zipped = ZipVals(left, right)
+			first  = Limit2(zipped, 10)
 			pairs  = ToPairs(first)
 			got    = slices.Collect(pairs)
 			want   = []Pair[int, int]{
@@ -62,8 +62,8 @@ func TestFirstN2(t *testing.T) {
 		var (
 			left   = slices.Values([]int{1, 2, 3})
 			right  = slices.Values([]int{101, 102, 103})
-			zipped = Zip(left, right)
-			first  = FirstN2(zipped, 10)
+			zipped = ZipVals(left, right)
+			first  = Limit2(zipped, 10)
 			pairs  = ToPairs(first)
 			got    = slices.Collect(pairs)
 			want   = []Pair[int, int]{
@@ -81,7 +81,7 @@ func TestFirstN2(t *testing.T) {
 func TestLast(t *testing.T) {
 	var (
 		ints     = Ints(0, 1)
-		first100 = FirstN(ints, 100)
+		first100 = Limit(ints, 100)
 		got      = LastN(first100, 7)
 		want     = []int{93, 94, 95, 96, 97, 98, 99}
 	)
@@ -95,7 +95,7 @@ func TestSkipN(t *testing.T) {
 		var (
 			ints      = Ints(0, 1)
 			skipped20 = SkipN(ints, 20)
-			twenties  = FirstN(skipped20, 10)
+			twenties  = Limit(skipped20, 10)
 			got       = slices.Collect(twenties)
 			want      = []int{20, 21, 22, 23, 24, 25, 26, 27, 28, 29}
 		)
@@ -108,7 +108,7 @@ func TestSkipN(t *testing.T) {
 		var (
 			ints      = slices.Values([]int{1, 2, 3})
 			skipped20 = SkipN(ints, 20)
-			twenties  = FirstN(skipped20, 10)
+			twenties  = Limit(skipped20, 10)
 			got       = slices.Collect(twenties)
 		)
 		if len(got) > 0 {
@@ -122,8 +122,8 @@ func TestSkipN2(t *testing.T) {
 		var (
 			left    = Ints(0, 1)
 			right   = Ints(100, 1)
-			zipped  = Zip(left, right)
-			first   = FirstN2(zipped, 20)
+			zipped  = ZipVals(left, right)
+			first   = Limit2(zipped, 20)
 			skipped = SkipN2(first, 10)
 			pairs   = ToPairs(skipped)
 			got     = slices.Collect(pairs)
@@ -149,8 +149,8 @@ func TestSkipN2(t *testing.T) {
 		var (
 			left    = slices.Values([]int{1, 2, 3})
 			right   = slices.Values([]int{101, 102, 103})
-			zipped  = Zip(left, right)
-			first   = FirstN2(zipped, 20)
+			zipped  = ZipVals(left, right)
+			first   = Limit2(zipped, 20)
 			skipped = SkipN2(first, 10)
 			pairs   = ToPairs(skipped)
 			got     = slices.Collect(pairs)

@@ -11,7 +11,7 @@ import (
 func TestToChan(t *testing.T) {
 	var (
 		ints  = Ints(0, 1)
-		first = FirstN(ints, 10)
+		first = Limit(ints, 10)
 		ch    = ToChan(first)
 		got   []int
 		want  = []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}

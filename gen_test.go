@@ -8,7 +8,7 @@ import (
 func TestInts(t *testing.T) {
 	var (
 		ints    = Ints(1, 2)
-		first10 = FirstN(ints, 10)
+		first10 = Limit(ints, 10)
 		got     = slices.Collect(first10)
 		want    = []int{1, 3, 5, 7, 9, 11, 13, 15, 17, 19}
 	)
@@ -20,7 +20,7 @@ func TestInts(t *testing.T) {
 func TestRepeat(t *testing.T) {
 	var (
 		r       = Repeat("foo")
-		first10 = FirstN(r, 10)
+		first10 = Limit(r, 10)
 		got     = slices.Collect(first10)
 		want    = []string{"foo", "foo", "foo", "foo", "foo", "foo", "foo", "foo", "foo", "foo"}
 	)

@@ -22,10 +22,10 @@ func TestConcat2(t *testing.T) {
 	var (
 		a1      = slices.Values([]int{1, 2, 3})
 		b1      = slices.Values([]int{4, 5, 6})
-		zipped1 = Zip(a1, b1)
+		zipped1 = ZipVals(a1, b1)
 		a2      = slices.Values([]int{100, 101, 102})
 		b2      = slices.Values([]int{103, 104, 105})
-		zipped2 = Zip(a2, b2)
+		zipped2 = ZipVals(a2, b2)
 		c       = Concat2(zipped1, zipped2)
 		pairs   = ToPairs(c)
 		got     = slices.Collect(pairs)

@@ -12,9 +12,9 @@ import (
 
 func ExampleAccum() {
 	var (
-		ints   = seqs.Ints(1, 1)      // All integers starting at 1
-		first5 = seqs.FirstN(ints, 5) // First 5 integers
-		sums   = seqs.Accum(first5, func(a, b int) int { return a + b })
+		ints   = seqs.Ints(1, 1)     // All integers starting at 1
+		first5 = seqs.Limit(ints, 5) // First 5 integers
+		sums   = seqs.Accum(first5, 0, func(a, b int) int { return a + b })
 	)
 	for val := range sums {
 		fmt.Println(val)
@@ -48,9 +48,9 @@ func ExampleBytes() {
 
 func ExampleDup() {
 	var (
-		ints       = seqs.Ints(1, 1)       // All integers starting at 1
-		first10    = seqs.FirstN(ints, 10) // First 10 integers
-		dups       = seqs.Dup(first10, 2)  // Two copies of the first10 iterator
+		ints       = seqs.Ints(1, 1)      // All integers starting at 1
+		first10    = seqs.Limit(ints, 10) // First 10 integers
+		dups       = seqs.Dup(first10, 2) // Two copies of the first10 iterator
 		evens      = seqs.Filter(dups[0], func(val int) bool { return val%2 == 0 })
 		odds       = seqs.Filter(dups[1], func(val int) bool { return val%2 == 1 })
 		evensSlice = slices.Collect(evens)
@@ -106,8 +106,8 @@ func ExampleLeft() {
 
 func ExamplePages() {
 	var (
-		ints    = seqs.Ints(1, 1)       // All integers starting at 1
-		first10 = seqs.FirstN(ints, 10) // First 10 integers
+		ints    = seqs.Ints(1, 1)      // All integers starting at 1
+		first10 = seqs.Limit(ints, 10) // First 10 integers
 	)
 	pages := seqs.Pages(first10, 3)
 	for page := range pages {
@@ -123,7 +123,7 @@ func ExamplePages() {
 func ExamplePartition() {
 	var (
 		ints       = seqs.Ints(0, 1)                                           // All integers starting at 0
-		first10    = seqs.FirstN(ints, 10)                                     // First 10 integers
+		first10    = seqs.Limit(ints, 10)                                      // First 10 integers
 		partitions = seqs.Partition(first10, func(n int) int { return n % 3 }) // 3 subsequences: integers mod 3
 
 		wg sync.WaitGroup
@@ -208,11 +208,11 @@ func ExampleUniq() {
 	// [1 2 3]
 }
 
-func ExampleZip() {
+func ExampleZipVals() {
 	var (
 		letters = slices.Values([]string{"a", "b", "c", "d"})
 		nums    = slices.Values([]int{1, 2, 3})
-		pairs   = seqs.Zip(letters, nums)
+		pairs   = seqs.ZipVals(letters, nums)
 	)
 	for x, y := range pairs {
 		fmt.Println(x, y)

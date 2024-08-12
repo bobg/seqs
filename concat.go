@@ -2,15 +2,12 @@ package seqs
 
 import "iter"
 
-// Concat concatenates the members of the input iterators.
-func Concat[T any](inps ...iter.Seq[T]) iter.Seq[T] {
-	return func(yield func(T) bool) {
-		for _, inp := range inps {
-			if inp == nil {
-				continue
-			}
-			for val := range inp {
-				if !yield(val) {
+// Concat returns an iterator over the concatenation of the sequences.
+func Concat[V any](seqs ...iter.Seq[V]) iter.Seq[V] {
+	return func(yield func(V) bool) {
+		for _, seq := range seqs {
+			for e := range seq {
+				if !yield(e) {
 					return
 				}
 			}
@@ -18,14 +15,12 @@ func Concat[T any](inps ...iter.Seq[T]) iter.Seq[T] {
 	}
 }
 
-func Concat2[T, U any](inps ...iter.Seq2[T, U]) iter.Seq2[T, U] {
-	return func(yield func(T, U) bool) {
-		for _, inp := range inps {
-			if inp == nil {
-				continue
-			}
-			for x, y := range inp {
-				if !yield(x, y) {
+// Concat2 returns an iterator over the concatenation of the sequences.
+func Concat2[K, V any](seqs ...iter.Seq2[K, V]) iter.Seq2[K, V] {
+	return func(yield func(K, V) bool) {
+		for _, seq := range seqs {
+			for k, v := range seq {
+				if !yield(k, v) {
 					return
 				}
 			}
