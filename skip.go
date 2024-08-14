@@ -6,7 +6,7 @@ import "iter"
 // discarding the initial elements until the first one that causes f to return true.
 // That element and the remaining elements of inp are included in the output,
 // and f is not called again.
-func SkipUntil[T any, F ~func(T) bool](inp iter.Seq[T], f F) iter.Seq[T] {
+func SkipUntil[T any](inp iter.Seq[T], f func(T) bool) iter.Seq[T] {
 	skipping := true
 	return Filter(inp, func(val T) bool {
 		if !skipping {

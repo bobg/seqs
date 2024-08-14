@@ -14,7 +14,7 @@ import "iter"
 // Reduce is equivalent to calling Last(Accum(inp, init, f)).
 // It consumes the entire input sequence.
 // Beware of infinite input!
-func Reduce[T, A any, F ~func(A, T) A](inp iter.Seq[T], init A, f F) A {
+func Reduce[T, A any](inp iter.Seq[T], init A, f func(A, T) A) A {
 	val, _ := Reducex(inp, init, func(acc A, t T) (A, error) {
 		return f(acc, t), nil
 	})
@@ -32,7 +32,7 @@ func Reduce[T, A any, F ~func(A, T) A](inp iter.Seq[T], init A, f F) A {
 //
 // Reducex consumes the entire input sequence.
 // Beware of infinite input!
-func Reducex[T, A any, F ~func(A, T) (A, error)](inp iter.Seq[T], init A, f F) (A, error) {
+func Reducex[T, A any](inp iter.Seq[T], init A, f func(A, T) (A, error)) (A, error) {
 	acc, errptr := Accumx(inp, init, f)
 	if last, ok := Last(acc); ok {
 		return last, *errptr
@@ -52,7 +52,7 @@ func Reducex[T, A any, F ~func(A, T) (A, error)](inp iter.Seq[T], init A, f F) (
 // Reduce2 is equivalent to calling Last2(Accum2(inp, init, f)).
 // It consumes the entire input sequence.
 // Beware of infinite input!
-func Reduce2[T, U, A any, F ~func(A, T, U) A](inp iter.Seq2[T, U], init A, f F) A {
+func Reduce2[T, U, A any](inp iter.Seq2[T, U], init A, f func(A, T, U) A) A {
 	acc, _ := Reduce2x(inp, init, func(acc A, t T, u U) (A, error) {
 		return f(acc, t, u), nil
 	})
@@ -70,7 +70,7 @@ func Reduce2[T, U, A any, F ~func(A, T, U) A](inp iter.Seq2[T, U], init A, f F) 
 //
 // Reduce2x consumes the entire input sequence.
 // Beware of infinite input!
-func Reduce2x[T, U, A any, F ~func(A, T, U) (A, error)](inp iter.Seq2[T, U], init A, f F) (A, error) {
+func Reduce2x[T, U, A any](inp iter.Seq2[T, U], init A, f func(A, T, U) (A, error)) (A, error) {
 	seq, errptr := Accum2x(inp, init, f)
 	if last, ok := Last(seq); ok {
 		return last, *errptr

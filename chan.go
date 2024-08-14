@@ -98,7 +98,7 @@ func ToChanContext[T any](ctx context.Context, f iter.Seq[T]) (<-chan T, *error)
 // Go runs a function in a goroutine and returns an iterator over the values it produces.
 // The function receives a channel for producing values.
 // The channel closes when the function exits.
-func Go[T any, F ~func(chan<- T) error](f F) (iter.Seq[T], *error) {
+func Go[T any](f func(chan<- T) error) (iter.Seq[T], *error) {
 	var (
 		ch  = make(chan T)
 		err error
@@ -115,7 +115,7 @@ func Go[T any, F ~func(chan<- T) error](f F) (iter.Seq[T], *error) {
 // Go2 runs a function in a goroutine and returns an iterator over the pairs of values it produces.
 // The function receives a channel for producing pairs.
 // The channel closes when the function exits.
-func Go2[T, U any, F ~func(chan<- Pair[T, U]) error](f F) (iter.Seq2[T, U], *error) {
+func Go2[T, U any](f func(chan<- Pair[T, U]) error) (iter.Seq2[T, U], *error) {
 	var (
 		ch  = make(chan Pair[T, U])
 		err error

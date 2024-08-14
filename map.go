@@ -3,7 +3,7 @@ package seqs
 import "iter"
 
 // Map returns an iterator over the values of inp transformed by the function f.
-func Map[T, U any, F ~func(T) U](inp iter.Seq[T], f F) iter.Seq[U] {
+func Map[T, U any](inp iter.Seq[T], f func(T) U) iter.Seq[U] {
 	seq, _ := Mapx(inp, func(val T) (U, error) {
 		return f(val), nil
 	})
@@ -14,7 +14,7 @@ func Map[T, U any, F ~func(T) U](inp iter.Seq[T], f F) iter.Seq[U] {
 // It produces an iterator of values transformed from an input iterator by a mapping function.
 // If the mapping function returns an error,
 // iteration stops and the error is available by dereferencing the returned pointer.
-func Mapx[T, U any, F ~func(T) (U, error)](inp iter.Seq[T], f F) (iter.Seq[U], *error) {
+func Mapx[T, U any](inp iter.Seq[T], f func(T) (U, error)) (iter.Seq[U], *error) {
 	var err error
 
 	g := func(yield func(U) bool) {
@@ -35,7 +35,7 @@ func Mapx[T, U any, F ~func(T) (U, error)](inp iter.Seq[T], f F) (iter.Seq[U], *
 }
 
 // Map2 returns an iterator over the pairs of values of inp transformed by the function f.
-func Map2[T1, U1, T2, U2 any, F ~func(T1, U1) (T2, U2)](inp iter.Seq2[T1, U1], f F) iter.Seq2[T2, U2] {
+func Map2[T1, U1, T2, U2 any](inp iter.Seq2[T1, U1], f func(T1, U1) (T2, U2)) iter.Seq2[T2, U2] {
 	seq, _ := Map2x(inp, func(t1 T1, u1 U1) (T2, U2, error) {
 		t2, u2 := f(t1, u1)
 		return t2, u2, nil
@@ -47,7 +47,7 @@ func Map2[T1, U1, T2, U2 any, F ~func(T1, U1) (T2, U2)](inp iter.Seq2[T1, U1], f
 // It produces an iterator of values transformed from an input iterator by a mapping function.
 // If the mapping function returns an error,
 // iteration stops and the error is available by dereferencing the returned pointer.
-func Map2x[T1, U1, T2, U2 any, F ~func(T1, U1) (T2, U2, error)](inp iter.Seq2[T1, U1], f F) (iter.Seq2[T2, U2], *error) {
+func Map2x[T1, U1, T2, U2 any](inp iter.Seq2[T1, U1], f func(T1, U1) (T2, U2, error)) (iter.Seq2[T2, U2], *error) {
 	var err error
 
 	g := func(yield func(T2, U2) bool) {

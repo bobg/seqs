@@ -6,7 +6,7 @@ import "iter"
 // and produces an iterator over the accumulated values.
 // On each call, the function receives the accumulated value and the next element of the input iterator.
 // The first call receives the initial value as the accumulated value.
-func Accum[T, A any, F ~func(A, T) A](inp iter.Seq[T], init A, f F) iter.Seq[A] {
+func Accum[T, A any](inp iter.Seq[T], init A, f func(A, T) A) iter.Seq[A] {
 	seq, _ := Accumx(inp, init, func(acc A, t T) (A, error) {
 		return f(acc, t), nil
 	})
@@ -21,7 +21,7 @@ func Accum[T, A any, F ~func(A, T) A](inp iter.Seq[T], init A, f F) iter.Seq[A] 
 // If the function returns an error, Accumx stops.
 // The error pointer that Accumx returns may be dereferenced to discover that error,
 // but only after the output iterator is fully consumed.
-func Accumx[T, A any, F ~func(A, T) (A, error)](inp iter.Seq[T], init A, f F) (iter.Seq[A], *error) {
+func Accumx[T, A any](inp iter.Seq[T], init A, f func(A, T) (A, error)) (iter.Seq[A], *error) {
 	var err error
 
 	seq := func(yield func(A) bool) {
@@ -41,7 +41,7 @@ func Accumx[T, A any, F ~func(A, T) (A, error)](inp iter.Seq[T], init A, f F) (i
 // and produces an iterator over the accumulated values.
 // On each call, the function receives the accumulated value and the next pair of elements from the input iterator.
 // The first call receives the initial value as the accumulated value.
-func Accum2[T, U, A any, F ~func(A, T, U) A](inp iter.Seq2[T, U], init A, f F) iter.Seq[A] {
+func Accum2[T, U, A any](inp iter.Seq2[T, U], init A, f func(A, T, U) A) iter.Seq[A] {
 	seq, _ := Accum2x(inp, init, func(acc A, t T, u U) (A, error) {
 		return f(acc, t, u), nil
 	})
@@ -56,7 +56,7 @@ func Accum2[T, U, A any, F ~func(A, T, U) A](inp iter.Seq2[T, U], init A, f F) i
 // If the function returns an error, Accum2x stops.
 // The error pointer that Accum2x returns may be dereferenced to discover that error,
 // but only after the output iterator is fully consumed.
-func Accum2x[T, U, A any, F ~func(A, T, U) (A, error)](inp iter.Seq2[T, U], init A, f F) (iter.Seq[A], *error) {
+func Accum2x[T, U, A any](inp iter.Seq2[T, U], init A, f func(A, T, U) (A, error)) (iter.Seq[A], *error) {
 	var err error
 
 	seq := func(yield func(A) bool) {
