@@ -113,76 +113,46 @@ func MergeAllFunc[T cmp.Ordered](inps []iter.Seq[T], f func(T, T) int) iter.Seq[
 	default:
 		return func(yield func(T) bool) {
 			var (
-				nexts     = make([]func() (T, bool), len(inps))
-				vals      = make([]T, len(inps))
-				done      = make([]bool, len(inps))
-				remaining = len(inps)
+				nexts = make([]func() (T, bool), 0, len(inps))
+				vals  = make([]T, 0, len(inps))
 			)
 
-			for i, inp := range inps {
+			for _, inp := range inps {
 				next, stop := iter.Pull(inp)
 				defer stop()
 
-				nexts[i] = next
 				val, ok := next()
 				if ok {
-					vals[i] = val
-				} else {
-					done[i] = true
-					remaining--
+					vals = append(vals, val)
+					nexts = append(nexts, next)
 				}
 			}
 
-			for remaining > 1 {
+			for len(vals) > 0 {
 				var (
-					first    = true
-					minVal   T
-					minIndex int
+					best      = vals[0]
+					bestIndex = 0
 				)
-				for i := 0; i < len(inps); i++ {
-					if done[i] {
-						continue
-					}
-					if first {
-						minVal = vals[i]
-						minIndex = i
-						first = false
-						continue
-					}
-					if f(vals[i], minVal) < 0 {
-						minVal = vals[i]
-						minIndex = i
+				for i := 1; i < len(vals); i++ {
+					val := vals[i]
+					if f(val, best) < 0 {
+						best = val
+						bestIndex = i
 					}
 				}
 
-				if !yield(minVal) {
+				if !yield(best) {
 					return
 				}
 
-				if val, ok := nexts[minIndex](); ok {
-					vals[minIndex] = val
+				// Replace the best value with the next value from its input.
+				nextval, ok := nexts[bestIndex]()
+				if ok {
+					vals[bestIndex] = nextval
 				} else {
-					done[minIndex] = true
-					remaining--
-				}
-			}
-
-			// Only one input sequence remaining.
-			// Find it and copy its values to the output.
-
-			index := slices.Index(done, false)
-			if !yield(vals[index]) {
-				return
-			}
-
-			next := nexts[index]
-			for {
-				val, ok := next()
-				if !ok {
-					return
-				}
-				if !yield(val) {
-					return
+					// That input is exhausted.
+					nexts = slices.Delete(nexts, bestIndex, bestIndex+1)
+					vals = slices.Delete(vals, bestIndex, bestIndex+1)
 				}
 			}
 		}

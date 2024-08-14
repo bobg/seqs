@@ -5,6 +5,7 @@ import (
 	"maps"
 	"slices"
 	"sort"
+	"strconv"
 	"sync"
 
 	"github.com/bobg/seqs"
@@ -18,6 +19,26 @@ func ExampleAccum() {
 	)
 	for val := range sums {
 		fmt.Println(val)
+	}
+	// Output:
+	// 1
+	// 3
+	// 6
+	// 10
+	// 15
+}
+
+func ExampleAccumx() {
+	intstrs := slices.Values([]string{"1", "2", "3", "4", "5"})
+	ints, errptr := seqs.Accumx(intstrs, 0, func(a int, s string) (int, error) {
+		val, err := strconv.Atoi(s)
+		return a + val, err
+	})
+	for sum := range ints {
+		fmt.Println(sum)
+	}
+	if *errptr != nil {
+		panic(*errptr)
 	}
 	// Output:
 	// 1

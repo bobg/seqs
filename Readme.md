@@ -7,13 +7,14 @@
 
 This is seqs,
 a library for working with iterable sequences,
-introduced via the “range over function” language feature
-and the [iter](https://pkg.go.dev/iter) standard-library package
-in Go 1.23.
+a.k.a. iterators,
+introduced in Go 1.23
+via the “range over function” language feature
+and the [iter](https://pkg.go.dev/iter) standard-library package.
 
-This is an adaptation to Go sequences of [github.com/bobg/go-generics/v3/iter](https://pkg.go.dev/github.com/bobg/go-generics/v3/iter).
+This is an adaptation of [github.com/bobg/go-generics/v3/iter](https://pkg.go.dev/github.com/bobg/go-generics/v3/iter).
 The central type in that package,
 [iter.Of](https://pkg.go.dev/github.com/bobg/go-generics/v3/iter#Of),
-was made obsolete with the introduction of Go sequences.
-This library provides operations on sequences analogous to the ones on `iter.Of` in the old package.
+was made obsolete with the introduction of Go iterators.
+This library provides operations on iterable sequences analogous to the ones on `iter.Of` in the old package.
 It combines those with [the proposal for an x/exp/iter package](https://github.com/golang/go/issues/61898).

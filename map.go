@@ -10,15 +10,6 @@ func Map[T, U any, F ~func(T) U](inp iter.Seq[T], f F) iter.Seq[U] {
 	return seq
 }
 
-// Map2 returns an iterator over f applied to seq.
-func Map2[T1, U1, T2, U2 any, F ~func(T1, U1) (T2, U2)](inp iter.Seq2[T1, U1], f F) iter.Seq2[T2, U2] {
-	seq, _ := Map2x(inp, func(t1 T1, u1 U1) (T2, U2, error) {
-		t2, u2 := f(t1, u1)
-		return t2, u2, nil
-	})
-	return seq
-}
-
 // Mapx is the extended form of [Map].
 // It produces an iterator of values transformed from an input iterator by a mapping function.
 // If the mapping function returns an error,
@@ -41,6 +32,15 @@ func Mapx[T, U any, F ~func(T) (U, error)](inp iter.Seq[T], f F) (iter.Seq[U], *
 	}
 
 	return g, &err
+}
+
+// Map2 returns an iterator over f applied to seq.
+func Map2[T1, U1, T2, U2 any, F ~func(T1, U1) (T2, U2)](inp iter.Seq2[T1, U1], f F) iter.Seq2[T2, U2] {
+	seq, _ := Map2x(inp, func(t1 T1, u1 U1) (T2, U2, error) {
+		t2, u2 := f(t1, u1)
+		return t2, u2, nil
+	})
+	return seq
 }
 
 // Map2x is the extended form of [Map2].
