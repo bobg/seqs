@@ -102,10 +102,24 @@ func Zip2[K1, V1, K2, V2 any](x iter.Seq2[K1, V1], y iter.Seq2[K2, V2]) iter.Seq
 // Zip produces zero values of the appropriate type in constructing pairs.
 func ZipVals[T, U any](t iter.Seq[T], u iter.Seq[U]) iter.Seq2[T, U] {
 	return func(yield func(T, U) bool) {
-		for z := range Zip(t, u) {
-			if !yield(z.V1, z.V2) {
+		next, stop := iter.Pull(u)
+		defer stop()
+
+		uval, ok := next()
+
+		for tval := range t {
+			if !yield(tval, uval) {
 				return
 			}
+			uval, ok = next()
+		}
+
+		var tval T
+		for ok {
+			if !yield(tval, uval) {
+				return
+			}
+			uval, ok = next()
 		}
 	}
 }

@@ -27,6 +27,10 @@ func Merge[T cmp.Ordered](x, y iter.Seq[T]) iter.Seq[T] {
 // If the two input sequences are not ordered by f,
 // the output sequence will not be ordered by f,
 // but it will still contain every value from x and y exactly once.
+//
+// The function f should return zero if its arguments are equal,
+// a negative value if the arguments are in the proper order,
+// and a positive value if they are in the reverse order.
 func MergeFunc[T any](x, y iter.Seq[T], f func(T, T) int) iter.Seq[T] {
 	return func(yield func(T) bool) {
 		next, stop := iter.Pull(y)
@@ -73,6 +77,10 @@ func Merge2[K cmp.Ordered, V any](x, y iter.Seq2[K, V]) iter.Seq2[K, V] {
 // If the two input sequences are not ordered by f,
 // the output sequence will not be ordered by f,
 // but it will still contain every pair from x and y exactly once.
+//
+// The function f should return zero if its arguments are equal,
+// a negative value if the arguments are in the proper order,
+// and a positive value if they are in the reverse order.
 func MergeFunc2[K, V any](x, y iter.Seq2[K, V], f func(K, K) int) iter.Seq2[K, V] {
 	return func(yield func(K, V) bool) {
 		next, stop := iter.Pull2(y)
@@ -98,10 +106,16 @@ func MergeFunc2[K, V any](x, y iter.Seq2[K, V], f func(K, K) int) iter.Seq2[K, V
 	}
 }
 
+// MergeAll merges zero or more ordered sequences into a single one.
 func MergeAll[T cmp.Ordered](seqs ...iter.Seq[T]) iter.Seq[T] {
 	return MergeAllFunc(seqs, cmp.Compare[T])
 }
 
+// MergeAllFunc merges zero or more ordered sequences into a single one,
+// using the ordering function f,
+// which should return zero if its arguments are equal,
+// a negative value if the arguments are in the proper order,
+// and a positive value if they are in the reverse order.
 func MergeAllFunc[T cmp.Ordered](inps []iter.Seq[T], f func(T, T) int) iter.Seq[T] {
 	switch len(inps) {
 	case 0:

@@ -2,7 +2,7 @@ package seqs
 
 import "iter"
 
-// Map returns an iterator over f applied to seq.
+// Map returns an iterator over the values of inp transformed by the function f.
 func Map[T, U any, F ~func(T) U](inp iter.Seq[T], f F) iter.Seq[U] {
 	seq, _ := Mapx(inp, func(val T) (U, error) {
 		return f(val), nil
@@ -34,7 +34,7 @@ func Mapx[T, U any, F ~func(T) (U, error)](inp iter.Seq[T], f F) (iter.Seq[U], *
 	return g, &err
 }
 
-// Map2 returns an iterator over f applied to seq.
+// Map2 returns an iterator over the pairs of values of inp transformed by the function f.
 func Map2[T1, U1, T2, U2 any, F ~func(T1, U1) (T2, U2)](inp iter.Seq2[T1, U1], f F) iter.Seq2[T2, U2] {
 	seq, _ := Map2x(inp, func(t1 T1, u1 U1) (T2, U2, error) {
 		t2, u2 := f(t1, u1)

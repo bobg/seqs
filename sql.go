@@ -3,28 +3,33 @@ package seqs
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"iter"
 	"reflect"
 )
 
-// QueryerContext is a minimal interface satisfied by *sql.DB
+// QueryerContext is a minimal interface satisfied by *sql.DB and *sql.Tx
 // (from database/sql).
 type QueryerContext interface {
 	QueryContext(context.Context, string, ...interface{}) (*sql.Rows, error)
 }
 
-// SQL performs a query against db and returns the results as an iterator of type T.
+// SQL performs a query against db
+// and returns the results as an iterator over items of type T.
 //
 // If the query produces a single value per row,
 // T may be any scalar type (bool, int, float, string)
-// into which the values can be scanned.
+// into which each row's value can be scanned.
 //
 // Otherwise T must be a struct type whose fields have the same types,
 // in the same order,
 // as the values being queried.
 // The values produced by the iterator will be instances of that struct type,
 // with fields populated by the queried values.
+//
+// The caller may check for errors by dereferencing the returned error pointer,
+// but only after the iterator is fully consumed.
 func SQL[T any](ctx context.Context, db QueryerContext, query string, args ...any) (iter.Seq[T], *error) {
 	rows, err := db.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -32,8 +37,9 @@ func SQL[T any](ctx context.Context, db QueryerContext, query string, args ...an
 	}
 
 	f := func(yield func(T) bool) {
-		defer rows.Close()
 		err = sqlHelper[T](ctx, rows, yield)
+		err2 := rows.Close()
+		err = errors.Join(err, err2)
 	}
 
 	return f, &err
@@ -41,6 +47,9 @@ func SQL[T any](ctx context.Context, db QueryerContext, query string, args ...an
 
 // Prepared is like [SQL] but uses a prepared [sql.Stmt] instead of a database and string query.
 // It is the caller's responsibility to close the statement.
+//
+// The caller may check for errors by dereferencing the returned error pointer,
+// but only after the iterator is fully consumed.
 func Prepared[T any](ctx context.Context, stmt *sql.Stmt, args ...any) (iter.Seq[T], *error) {
 	rows, err := stmt.QueryContext(ctx, args...)
 	if err != nil {
@@ -48,8 +57,9 @@ func Prepared[T any](ctx context.Context, stmt *sql.Stmt, args ...any) (iter.Seq
 	}
 
 	f := func(yield func(T) bool) {
-		defer rows.Close()
 		err = sqlHelper[T](ctx, rows, yield)
+		err2 := rows.Close()
+		err = errors.Join(err, err2)
 	}
 
 	return f, &err

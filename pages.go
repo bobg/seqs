@@ -6,7 +6,7 @@ import "iter"
 // Each page is a slice of up to pageSize items.
 func Pages[T any](inp iter.Seq[T], pageSize int) iter.Seq[[]T] {
 	return func(yield func([]T) bool) {
-		var page []T
+		page := make([]T, 0, pageSize)
 
 		for x := range inp {
 			page = append(page, x)
@@ -14,7 +14,7 @@ func Pages[T any](inp iter.Seq[T], pageSize int) iter.Seq[[]T] {
 				if !yield(page) {
 					return
 				}
-				page = nil
+				page = make([]T, 0, pageSize)
 			}
 		}
 

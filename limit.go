@@ -2,9 +2,10 @@ package seqs
 
 import "iter"
 
-// Limit returns an iterator over seq that stops after n values.
-func Limit[V any](seq iter.Seq[V], n int) iter.Seq[V] {
-	return func(yield func(V) bool) {
+// Limit returns an iterator over the elements of seq that stops after n values
+// (or when seq is exhausted, whichever comes first).
+func Limit[T any](seq iter.Seq[T], n int) iter.Seq[T] {
+	return func(yield func(T) bool) {
 		if n <= 0 {
 			return
 		}
@@ -19,9 +20,10 @@ func Limit[V any](seq iter.Seq[V], n int) iter.Seq[V] {
 	}
 }
 
-// Limit2 returns an iterator over seq that stops after n key-value pairs.
-func Limit2[K, V any](seq iter.Seq2[K, V], n int) iter.Seq2[K, V] {
-	return func(yield func(K, V) bool) {
+// Limit returns an iterator over the elements of seq that stops after n pairs
+// (or when seq is exhausted, whichever comes first).
+func Limit2[T, U any](seq iter.Seq2[T, U], n int) iter.Seq2[T, U] {
+	return func(yield func(T, U) bool) {
 		if n <= 0 {
 			return
 		}

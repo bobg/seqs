@@ -2,11 +2,8 @@ package seqs_test
 
 import (
 	"fmt"
-	"maps"
 	"slices"
-	"sort"
 	"strconv"
-	"sync"
 
 	"github.com/bobg/seqs"
 )
@@ -139,43 +136,6 @@ func ExamplePages() {
 	// [4 5 6]
 	// [7 8 9]
 	// [10]
-}
-
-func ExamplePartition() {
-	var (
-		ints       = seqs.Ints(0, 1)                                           // All integers starting at 0
-		first10    = seqs.Limit(ints, 10)                                      // First 10 integers
-		partitions = seqs.Partition(first10, func(n int) int { return n % 3 }) // 3 subsequences: integers mod 3
-
-		wg sync.WaitGroup
-		mu sync.Mutex // Protects m
-		m  = make(map[int][]int)
-	)
-
-	// This loop illustrates how the subsequences produced by Partition should be consumed in parallel.
-	for k, seq := range partitions {
-		wg.Add(1)
-		go func() {
-			members := slices.Collect(seq)
-			mu.Lock()
-			m[k] = members
-			mu.Unlock()
-			wg.Done()
-		}()
-	}
-
-	wg.Wait()
-
-	keys := slices.Collect(maps.Keys(m))
-	sort.Ints(keys)
-	for _, k := range keys {
-		fmt.Println(k, m[k])
-	}
-
-	// Output:
-	// 0 [0 3 6 9]
-	// 1 [1 4 7]
-	// 2 [2 5 8]
 }
 
 func ExampleRight() {

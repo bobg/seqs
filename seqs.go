@@ -11,7 +11,7 @@ func From[T any](items ...T) iter.Seq[T] {
 	return slices.Values(items)
 }
 
-// Pair is a simple, generic pair of values.
+// Pair is a generic pair of values.
 type Pair[T, U any] struct {
 	X T
 	Y U
