@@ -70,11 +70,14 @@ func ExampleCheckEmpty() {
 		empty = seqs.Empty[int] // No integers at all
 	)
 
-	ints, isEmpty := seqs.CheckEmpty(ints)
+	ints, isEmpty := seqs.CheckEmpty(ints) // Reassign ints to get an iterator that preserves the first value of the original ints
 	fmt.Printf("ints is empty: %t\n", isEmpty)
 
-	empty, isEmpty = seqs.CheckEmpty(empty)
+	empty, isEmpty = seqs.CheckEmpty(empty) // Reassign empty to get an iterator that preserves the first value of the original empty
 	fmt.Printf("empty is empty: %t\n", isEmpty)
+
+	_, _ = ints, empty // (silence linter "declared but not used" error)
+
 	// Output:
 	// ints is empty: false
 	// empty is empty: true
