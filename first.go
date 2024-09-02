@@ -12,3 +12,15 @@ func First[T any](seq iter.Seq[T]) (T, bool) {
 	var zero T
 	return zero, false
 }
+
+func First2[T, U any](seq iter.Seq2[T, U]) (T, U, bool) {
+	for x, y := range seq {
+		return x, y, true
+	}
+
+	var (
+		zeroT T
+		zeroU U
+	)
+	return zeroT, zeroU, false
+}

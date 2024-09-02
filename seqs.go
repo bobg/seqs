@@ -131,16 +131,6 @@ func CompareFunc[T any](a, b iter.Seq[T], f func(T, T) int) int {
 	}
 }
 
-// Empty is an empty sequence that can be used where an [iter.Seq] is expected.
-// Usage note: you generally don't want to call this function,
-// just refer to it as Empty[typename].
-func Empty[T any](func(T) bool) {}
-
-// Empty2 is an empty sequence that can be used where an [iter.Seq2] is expected.
-// Usage note: you generally don't want to call this function,
-// just refer to it as Empty2[typename1, typename2].
-func Empty2[T, U any](func(T, U) bool) {}
-
 // Drain consumes all the elements of a sequence and returns the number of elements consumed.
 // If the sequence is infinite, Drain will not terminate.
 func Drain[T any](inp iter.Seq[T]) int {

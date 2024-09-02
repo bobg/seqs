@@ -64,6 +64,22 @@ func ExampleBytes() {
 	// 140
 }
 
+func ExampleCheckEmpty() {
+	var (
+		ints  = seqs.Ints(1, 1) // All integers starting at 1
+		empty = seqs.Empty[int] // No integers at all
+	)
+
+	ints, isEmpty := seqs.CheckEmpty(ints)
+	fmt.Printf("ints is empty: %t\n", isEmpty)
+
+	empty, isEmpty = seqs.CheckEmpty(empty)
+	fmt.Printf("empty is empty: %t\n", isEmpty)
+	// Output:
+	// ints is empty: false
+	// empty is empty: true
+}
+
 func ExampleDup() {
 	var (
 		ints       = seqs.Ints(1, 1)      // All integers starting at 1
@@ -136,6 +152,23 @@ func ExamplePages() {
 	// [4 5 6]
 	// [7 8 9]
 	// [10]
+}
+
+func ExamplePeek() {
+	var (
+		ints   = seqs.Ints(1, 1)     // All integers starting at 1
+		first3 = seqs.Limit(ints, 3) // First three integers
+	)
+
+	peeked, ok, first3 := seqs.Peek(first3)
+	if ok {
+		all3 := slices.Collect(first3)
+		fmt.Printf("Peeked value is %d, full sequence is %v\n", peeked, all3)
+	} else {
+		fmt.Println("Sequence is empty")
+	}
+	// Output:
+	// Peeked value is 1, full sequence is [1 2 3]
 }
 
 func ExampleRight() {
