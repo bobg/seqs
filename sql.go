@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"iter"
 	"reflect"
+	"strings"
 )
 
 // QueryerContext is a minimal interface satisfied by *sql.DB and *sql.Tx
@@ -21,6 +22,7 @@ type QueryerContext interface {
 // If the query produces a single value per row,
 // T may be any scalar type (bool, int, float, string)
 // into which each row's value can be scanned.
+// T may also be [sql.Null] for querying a single nullable column.
 //
 // Otherwise T must be a struct type whose fields have the same types,
 // in the same order,
@@ -74,8 +76,15 @@ func (e sqlKindError) Error() string {
 }
 
 func sqlHelper[T any](ctx context.Context, rows *sql.Rows, yield func(T) bool) error {
-	var t T
-	tt := reflect.TypeOf(t)
+	var (
+		t  T
+		tt = reflect.TypeOf(t)
+	)
+
+	if isSqlNull(tt) {
+		return sqlHelperScalar[T](ctx, rows, yield)
+	}
+
 	switch tt.Kind() {
 	case reflect.Struct:
 		return sqlHelperStruct[T](ctx, tt, rows, yield)
@@ -86,6 +95,13 @@ func sqlHelper[T any](ctx context.Context, rows *sql.Rows, yield func(T) bool) e
 	default:
 		return sqlKindError{kind: tt.Kind()}
 	}
+}
+
+func isSqlNull(tt reflect.Type) bool {
+	if tt.PkgPath() != "database/sql" {
+		return false
+	}
+	return strings.HasPrefix(tt.Name(), "Null[")
 }
 
 func sqlHelperStruct[T any](ctx context.Context, rowtype reflect.Type, rows *sql.Rows, yield func(T) bool) error {
