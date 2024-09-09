@@ -70,18 +70,42 @@ func TestSQL(t *testing.T) {
 	const q = `SELECT name, salary FROM employees ORDER BY name`
 
 	t.Run("Scalar", func(t *testing.T) {
-		it, errptr := SQL[string](ctx, db, `SELECT name FROM employees ORDER BY name DESC`)
-		if *errptr != nil {
-			t.Fatal(*errptr)
-		}
-		got := slices.Collect(it)
-		if *errptr != nil {
-			t.Fatal(*errptr)
-		}
 		want := []string{"dave", "carol", "bill", "alice"}
-		if !slices.Equal(got, want) {
-			t.Errorf("got %v, want %v", got, want)
-		}
+
+		t.Run("Plain", func(t *testing.T) {
+			it, errptr := SQL[string](ctx, db, `SELECT name FROM employees ORDER BY name DESC`)
+			if *errptr != nil {
+				t.Fatal(*errptr)
+			}
+			got := slices.Collect(it)
+			if *errptr != nil {
+				t.Fatal(*errptr)
+			}
+			if !slices.Equal(got, want) {
+				t.Errorf("got %v, want %v", got, want)
+			}
+		})
+
+		t.Run("Nullable", func(t *testing.T) {
+			it, errptr := SQL[sql.Null[string]](ctx, db, `SELECT name FROM employees ORDER BY name DESC`)
+			if *errptr != nil {
+				t.Fatal(*errptr)
+			}
+			var got []string
+			for n := range it {
+				if !n.Valid {
+					t.Fatal("got invalid, want valid")
+				}
+				got = append(got, n.V)
+			}
+			if *errptr != nil {
+				t.Fatal(*errptr)
+			}
+			if !slices.Equal(got, want) {
+				t.Errorf("got %v, want %v", got, want)
+			}
+		})
+
 	})
 
 	t.Run("SQL", func(t *testing.T) {
@@ -93,7 +117,6 @@ func TestSQL(t *testing.T) {
 		if *errptr != nil {
 			t.Fatal(*errptr)
 		}
-
 		if !slices.Equal(got, want) {
 			t.Errorf("got %v, want %v", got, want)
 		}
