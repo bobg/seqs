@@ -4,47 +4,29 @@ import "iter"
 
 // First returns the first value of seq and true.
 // If seq is empty, it returns the zero value of T and false.
-//
-// Deprecated: This function does not behave as you might expect.
-// Namely, after calling First on an iterator x,
-// you might expect that calling First(x) again would produce the second value
-// (the first one having been consumed).
-// Instead, it restarts the underlying iteration
-// (which, depending on the data source, may be a costly operation).
-// Callers should use [Peek] instead,
-// which in addition to returning the iterator's first value
-// also returns a new iterator over the original values
-// without restarting anything.
-func First[T any](seq iter.Seq[T]) (T, bool) {
+func First[T any](seq iter.Seq[T]) (T, bool, func()) {
+	var stop func()
+	seq, stop = Resumable(seq)
 	for v := range seq {
-		return v, true
+		return v, true, stop
 	}
 
 	var zero T
-	return zero, false
+	return zero, false, func() {}
 }
 
 // First2 returns the first pair of values of seq, and true.
 // If seq is empty, it returns the zero values of T and U, and false.
-//
-// Deprecated: This function does not behave as you might expect.
-// Namely, after calling First2 on an iterator x,
-// you might expect that calling First2(x) again would produce the second pair of values
-// (the first pair having been consumed).
-// Instead, it restarts the underlying iteration
-// (which, depending on the data source, may be a costly operation).
-// Callers should use [Peek2] instead,
-// which in addition to returning the iterator's first value pair
-// also returns a new iterator over the original pairs
-// without restarting anything.
-func First2[T, U any](seq iter.Seq2[T, U]) (T, U, bool) {
+func First2[T, U any](seq iter.Seq2[T, U]) (T, U, bool, func()) {
+	var stop func()
+	seq, stop = Resumable2(seq)
 	for x, y := range seq {
-		return x, y, true
+		return x, y, true, stop
 	}
 
 	var (
 		zeroT T
 		zeroU U
 	)
-	return zeroT, zeroU, false
+	return zeroT, zeroU, false, func() {}
 }

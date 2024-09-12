@@ -6,65 +6,53 @@ import "iter"
 // If the iterator is empty, the returned boolean is false, otherwise it's true.
 // The first value of the input iterator, if there is one, is consumed.
 // The returned iterator is a copy of the original iterator with any consumed value restored.
-func Peek[T any](inp iter.Seq[T]) (T, bool, iter.Seq[T]) {
-	next, stop := iter.Pull(inp)
+// Also returned is a "stop" function that must be used when finished with the returned iterator.
+func Peek[T any](inp iter.Seq[T]) (T, bool, iter.Seq[T], func()) {
+	var stop func()
+	inp, stop = Resumable(inp)
 
-	if v, ok := next(); ok {
-		return v, true, func(yield func(T) bool) {
-			defer stop()
-
+	for v := range inp {
+		out := func(yield func(T) bool) {
 			if !yield(v) {
 				return
 			}
-			for {
-				v, ok := next()
-				if !ok {
-					return
-				}
+			for v := range inp {
 				if !yield(v) {
 					return
 				}
 			}
 		}
+		return v, true, out, stop
 	}
 
-	stop()
-
 	var zero T
-	return zero, false, Empty[T]
+	return zero, false, inp, stop
 }
 
 // Peek2 returns the first pair of values in the given iterator.
 // If the iterator is empty, the returned boolean is false, otherwise it's true.
 // The first pair of the input iterator, if there is one, is consumed.
 // The returned iterator is a copy of the original iterator with any consumed pair restored.
-func Peek2[T, U any](inp iter.Seq2[T, U]) (T, U, bool, iter.Seq2[T, U]) {
-	next, stop := iter.Pull2(inp)
+// Also returned is a "stop" function that must be used when finished with the returned iterator.
+func Peek2[T, U any](inp iter.Seq2[T, U]) (T, U, bool, iter.Seq2[T, U], func()) {
+	var stop func()
+	inp, stop = Resumable2(inp)
 
-	if t, u, ok := next(); ok {
-		return t, u, true, func(yield func(T, U) bool) {
-			defer stop()
-
-			if !yield(t, u) {
+	for x, y := range inp {
+		out := func(yield func(T, U) bool) {
+			if !yield(x, y) {
 				return
 			}
-			for {
-				t, u, ok := next()
-				if !ok {
-					return
-				}
-				if !yield(t, u) {
+			for x, y := range inp {
+				if !yield(x, y) {
 					return
 				}
 			}
 		}
+		return x, y, true, out, stop
 	}
 
-	stop()
-
-	var (
-		zeroT T
-		zeroU U
-	)
-	return zeroT, zeroU, false, Empty2[T, U]
+	var zeroT T
+	var zeroU U
+	return zeroT, zeroU, false, inp, stop
 }

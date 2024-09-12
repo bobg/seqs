@@ -13,61 +13,49 @@ import (
 // of the difference between the output iterator that is farthest ahead in the stream,
 // and the one that is farthest behind.
 func Dup[T any](inp iter.Seq[T], n int) []iter.Seq[T] {
-	next, stop := iter.Pull(inp)
-
 	var (
+		ch = make(chan T)
+
 		mu        sync.Mutex
 		buf       []T
 		bufOffset int
 		offsets   = make([]int, n)
 		result    []iter.Seq[T]
-		wg        sync.WaitGroup
 	)
 
+	go func() { // xxx exit early if all output iterators are done
+		for val := range inp {
+			ch <- val
+		}
+		close(ch)
+	}()
+
 	for i := 0; i < n; i++ {
-		wg.Add(1)
+		helper := func(yield func(T) bool) bool {
+			mu.Lock()
+			defer mu.Unlock()
 
-		result = append(result, func(yield func(T) bool) {
-			defer wg.Done()
-
-			helper := func() bool {
-				mu.Lock()
-				defer mu.Unlock()
-
-				bufEnd := bufOffset + len(buf)
-				for offsets[i] >= bufEnd {
-					val, ok := next()
-					if !ok {
-						return false
-					}
-					buf = append(buf, val)
-					bufEnd++
+			bufEnd := bufOffset + len(buf)
+			for offsets[i] >= bufEnd {
+				val, ok := <-ch
+				if !ok {
+					return false
 				}
-				val := buf[offsets[i]-bufOffset]
-				offsets[i]++
-
-				minOffset := offsets[0]
-				for j := 1; j < n; j++ {
-					if offsets[j] < minOffset {
-						minOffset = offsets[j]
-					}
-				}
-
-				buf = buf[minOffset-bufOffset:]
-				bufOffset = minOffset
-
-				return yield(val)
+				buf = append(buf, val)
+				bufEnd++
 			}
-
-			for helper() {
+			val := buf[offsets[i]-bufOffset]
+			offsets[i]++
+			return yield(val)
+		}
+		result = append(result, func(yield func(T) bool) {
+			for {
+				if !helper(yield) {
+					return
+				}
 			}
 		})
 	}
-
-	go func() {
-		wg.Wait()
-		stop()
-	}()
 
 	return result
 }

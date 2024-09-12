@@ -10,7 +10,8 @@ func TestCheckEmpty(t *testing.T) {
 		ints   = Ints(1, 1)
 		first3 = Limit(ints, 3)
 	)
-	first3, isEmpty := CheckEmpty(first3)
+	first3, isEmpty, stop := CheckEmpty(first3)
+	defer stop()
 	if isEmpty {
 		t.Error("got isEmpty == true, want false")
 	}
@@ -20,7 +21,8 @@ func TestCheckEmpty(t *testing.T) {
 		t.Errorf("got %v, want %v", got, want)
 	}
 
-	_, isEmpty = CheckEmpty(Empty[int])
+	_, isEmpty, stop = CheckEmpty(Empty[int])
+	defer stop()
 	if !isEmpty {
 		t.Error("got isEmpty == false, want true")
 	}
@@ -33,7 +35,8 @@ func TestCheckEmpty2(t *testing.T) {
 		zipped  = ZipVals(ints, squares)
 		first3  = Limit2(zipped, 3)
 	)
-	first3, isEmpty := CheckEmpty2(first3)
+	first3, isEmpty, stop := CheckEmpty2(first3)
+	defer stop()
 	if isEmpty {
 		t.Error("got isEmpty == true, want false")
 	}
@@ -43,7 +46,8 @@ func TestCheckEmpty2(t *testing.T) {
 		t.Errorf("got %v, want %v", got, want)
 	}
 
-	_, isEmpty = CheckEmpty2(Empty2[int, int])
+	_, isEmpty, stop = CheckEmpty2(Empty2[int, int])
+	defer stop()
 	if !isEmpty {
 		t.Error("got isEmpty == false, want true")
 	}

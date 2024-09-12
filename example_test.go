@@ -70,10 +70,12 @@ func ExampleCheckEmpty() {
 		empty = seqs.Empty[int] // No integers at all
 	)
 
-	ints, isEmpty := seqs.CheckEmpty(ints) // Reassign ints to get an iterator that preserves the first value of the original ints
+	ints, isEmpty, stop := seqs.CheckEmpty(ints) // Reassign ints to get an iterator that preserves the first value of the original ints
+	defer stop()
 	fmt.Printf("ints is empty: %t\n", isEmpty)
 
-	empty, isEmpty = seqs.CheckEmpty(empty) // Reassign empty to get an iterator that preserves the first value of the original empty
+	empty, isEmpty, stop = seqs.CheckEmpty(empty) // Reassign empty to get an iterator that preserves the first value of the original empty
+	defer stop()
 	fmt.Printf("empty is empty: %t\n", isEmpty)
 
 	_, _ = ints, empty // (silence linter "declared but not used" error)
@@ -163,7 +165,8 @@ func ExamplePeek() {
 		first3 = seqs.Limit(ints, 3) // First three integers
 	)
 
-	peeked, ok, first3 := seqs.Peek(first3)
+	peeked, ok, first3, stop := seqs.Peek(first3)
+	defer stop()
 	if ok {
 		all3 := slices.Collect(first3)
 		fmt.Printf("Peeked value is %d, full sequence is %v\n", peeked, all3)
