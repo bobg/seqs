@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strconv"
 
-	"github.com/bobg/seqs"
+	"github.com/bobg/seqs/v2"
 )
 
 func ExampleAccum() {
