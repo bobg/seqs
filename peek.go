@@ -6,6 +6,14 @@ import "iter"
 // If the iterator is empty, the returned boolean is false, otherwise it's true.
 // The first value of the input iterator, if there is one, is consumed.
 // The returned iterator is a copy of the original iterator with any consumed value restored.
+//
+// Note: if the caller fails to consume the returned iterator,
+// this function can leak resources.
+// One good way to make sure this does not happen,
+// if the iterator is unneeded,
+// is to pass the iterator to [Drain].
+// Another is to call [iter.Pull] on it
+// and immediately call the returned "stop" function.
 func Peek[T any](inp iter.Seq[T]) (T, bool, iter.Seq[T]) {
 	next, stop := iter.Pull(inp)
 
@@ -38,6 +46,14 @@ func Peek[T any](inp iter.Seq[T]) (T, bool, iter.Seq[T]) {
 // If the iterator is empty, the returned boolean is false, otherwise it's true.
 // The first pair of the input iterator, if there is one, is consumed.
 // The returned iterator is a copy of the original iterator with any consumed pair restored.
+//
+// Note: if the caller fails to consume the returned iterator,
+// this function can leak resources.
+// One good way to make sure this does not happen,
+// if the iterator is unneeded,
+// is to pass the iterator to [Drain2].
+// Another is to call [iter.Pull2] on it
+// and immediately call the returned "stop" function.
 func Peek2[T, U any](inp iter.Seq2[T, U]) (T, U, bool, iter.Seq2[T, U]) {
 	next, stop := iter.Pull2(inp)
 
