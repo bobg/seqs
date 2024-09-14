@@ -10,6 +10,7 @@ import (
 // and break out of the loop early,
 // you cannot resume the iteration later:
 // a new "for ... range" loop with the same iterator will start a new iteration.
+// (Example: https://go.dev/play/p/f9itybqhUH2.)
 // But a resumable iterator will remember where it left off.
 //
 // In addition to the resumable iterator,

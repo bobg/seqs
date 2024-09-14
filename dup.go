@@ -3,6 +3,7 @@ package seqs
 import (
 	"iter"
 	"sync"
+	"sync/atomic"
 )
 
 // Dup duplicates the contents of an iterator,
@@ -21,13 +22,23 @@ func Dup[T any](inp iter.Seq[T], n int) []iter.Seq[T] {
 		bufOffset int
 		offsets   = make([]int, n)
 		result    []iter.Seq[T]
+
+		nrunning int32 = int32(n)
+		done           = make(chan struct{})
 	)
 
-	go func() { // xxx exit early if all output iterators are done
+	go func() {
+		defer close(ch)
+
 		for val := range inp {
-			ch <- val
+			select {
+			case <-done:
+				// Return early if all duplicate iterators are done.
+				return
+
+			case ch <- val:
+			}
 		}
-		close(ch)
 	}()
 
 	for i := 0; i < n; i++ {
@@ -49,6 +60,12 @@ func Dup[T any](inp iter.Seq[T], n int) []iter.Seq[T] {
 			return yield(val)
 		}
 		result = append(result, func(yield func(T) bool) {
+			defer func() {
+				if n := atomic.AddInt32(&nrunning, -1); n <= 0 {
+					close(done)
+				}
+			}()
+
 			for {
 				if !helper(yield) {
 					return
