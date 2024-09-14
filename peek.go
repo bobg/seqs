@@ -52,7 +52,9 @@ func Peek2[T, U any](inp iter.Seq2[T, U]) (T, U, bool, iter.Seq2[T, U], func()) 
 		return x, y, true, out, stop
 	}
 
-	var zeroT T
-	var zeroU U
+	var (
+		zeroT T
+		zeroU U
+	)
 	return zeroT, zeroU, false, inp, stop
 }
