@@ -130,23 +130,3 @@ func CompareFunc[T any](a, b iter.Seq[T], f func(T, T) int) int {
 		}
 	}
 }
-
-// Drain consumes all the elements of a sequence and returns the number of elements consumed.
-// If the sequence is infinite, Drain will not terminate.
-func Drain[T any](inp iter.Seq[T]) int {
-	var n int
-	for range inp {
-		n++
-	}
-	return n
-}
-
-// Drain2 consumes all the elements of a sequence and returns the number of elements consumed.
-// If the sequence is infinite, Drain2 will not terminate.
-func Drain2[T, U any](inp iter.Seq2[T, U]) int {
-	var n int
-	for range inp {
-		n++
-	}
-	return n
-}
