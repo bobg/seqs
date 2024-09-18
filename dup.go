@@ -3,6 +3,7 @@ package seqs
 import (
 	"iter"
 	"sync"
+	"sync/atomic"
 )
 
 // Dup duplicates the contents of an iterator,
@@ -13,61 +14,65 @@ import (
 // of the difference between the output iterator that is farthest ahead in the stream,
 // and the one that is farthest behind.
 func Dup[T any](inp iter.Seq[T], n int) []iter.Seq[T] {
-	next, stop := iter.Pull(inp)
-
 	var (
+		ch = make(chan T)
+
 		mu        sync.Mutex
 		buf       []T
 		bufOffset int
 		offsets   = make([]int, n)
 		result    []iter.Seq[T]
-		wg        sync.WaitGroup
+
+		nrunning int32 = int32(n)
+		done           = make(chan struct{})
 	)
 
-	for i := 0; i < n; i++ {
-		wg.Add(1)
+	go func() {
+		defer close(ch)
 
-		result = append(result, func(yield func(T) bool) {
-			defer wg.Done()
+		for val := range inp {
+			select {
+			case <-done:
+				// Return early if all duplicate iterators are done.
+				return
 
-			helper := func() bool {
-				mu.Lock()
-				defer mu.Unlock()
-
-				bufEnd := bufOffset + len(buf)
-				for offsets[i] >= bufEnd {
-					val, ok := next()
-					if !ok {
-						return false
-					}
-					buf = append(buf, val)
-					bufEnd++
-				}
-				val := buf[offsets[i]-bufOffset]
-				offsets[i]++
-
-				minOffset := offsets[0]
-				for j := 1; j < n; j++ {
-					if offsets[j] < minOffset {
-						minOffset = offsets[j]
-					}
-				}
-
-				buf = buf[minOffset-bufOffset:]
-				bufOffset = minOffset
-
-				return yield(val)
+			case ch <- val:
 			}
+		}
+	}()
 
-			for helper() {
+	for i := 0; i < n; i++ {
+		helper := func(yield func(T) bool) bool {
+			mu.Lock()
+			defer mu.Unlock()
+
+			bufEnd := bufOffset + len(buf)
+			for offsets[i] >= bufEnd {
+				val, ok := <-ch
+				if !ok {
+					return false
+				}
+				buf = append(buf, val)
+				bufEnd++
+			}
+			val := buf[offsets[i]-bufOffset]
+			offsets[i]++
+			return yield(val)
+		}
+		result = append(result, func(yield func(T) bool) {
+			defer func() {
+				if n := atomic.AddInt32(&nrunning, -1); n <= 0 {
+					close(done)
+				}
+			}()
+
+			for {
+				if !helper(yield) {
+					return
+				}
 			}
 		})
 	}
-
-	go func() {
-		wg.Wait()
-		stop()
-	}()
 
 	return result
 }
