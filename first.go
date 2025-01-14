@@ -4,6 +4,7 @@ import "iter"
 
 // First returns the first value of seq and true.
 // If seq is empty, it returns the zero value of T and false.
+// The returned func() must be called when you're done with the iterator.
 func First[T any](seq iter.Seq[T]) (T, bool, func()) {
 	var stop func()
 	seq, stop = Resumable(seq)
@@ -17,6 +18,7 @@ func First[T any](seq iter.Seq[T]) (T, bool, func()) {
 
 // First2 returns the first pair of values of seq, and true.
 // If seq is empty, it returns the zero values of T and U, and false.
+// The returned func() must be called when you're done with the iterator.
 func First2[T, U any](seq iter.Seq2[T, U]) (T, U, bool, func()) {
 	var stop func()
 	seq, stop = Resumable2(seq)
