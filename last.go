@@ -3,7 +3,7 @@ package seqs
 import (
 	"iter"
 
-	"github.com/bobg/go-generics/v3/slices"
+	"github.com/bobg/go-generics/v4/slices"
 )
 
 // Last returns the last element of the input sequence and true.
