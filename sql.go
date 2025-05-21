@@ -33,18 +33,15 @@ type QueryerContext interface {
 // The caller may check for errors by dereferencing the returned error pointer,
 // but only after the iterator is fully consumed.
 func SQL[T any](ctx context.Context, db QueryerContext, query string, args ...any) (iter.Seq[T], *error) {
-	rows, err := db.QueryContext(ctx, query, args...)
-	if err != nil {
-		return Empty[T], &err
-	}
-
-	f := func(yield func(T) bool) {
+	return Err(func(yield func(T) bool) error {
+		rows, err := db.QueryContext(ctx, query, args...)
+		if err != nil {
+			return err
+		}
 		err = sqlHelper[T](ctx, rows, yield)
 		err2 := rows.Close()
-		err = errors.Join(err, err2)
-	}
-
-	return f, &err
+		return errors.Join(err, err2)
+	})
 }
 
 // Prepared is like [SQL] but uses a prepared [sql.Stmt] instead of a database and string query.
@@ -53,18 +50,15 @@ func SQL[T any](ctx context.Context, db QueryerContext, query string, args ...an
 // The caller may check for errors by dereferencing the returned error pointer,
 // but only after the iterator is fully consumed.
 func Prepared[T any](ctx context.Context, stmt *sql.Stmt, args ...any) (iter.Seq[T], *error) {
-	rows, err := stmt.QueryContext(ctx, args...)
-	if err != nil {
-		return Empty[T], &err
-	}
-
-	f := func(yield func(T) bool) {
+	return Err(func(yield func(T) bool) error {
+		rows, err := stmt.QueryContext(ctx, args...)
+		if err != nil {
+			return err
+		}
 		err = sqlHelper[T](ctx, rows, yield)
 		err2 := rows.Close()
-		err = errors.Join(err, err2)
-	}
-
-	return f, &err
+		return errors.Join(err, err2)
+	})
 }
 
 type sqlKindError struct {

@@ -15,23 +15,18 @@ func Map[T, U any](inp iter.Seq[T], f func(T) U) iter.Seq[U] {
 // If the mapping function returns an error,
 // iteration stops and the error is available by dereferencing the returned pointer.
 func Mapx[T, U any](inp iter.Seq[T], f func(T) (U, error)) (iter.Seq[U], *error) {
-	var err error
-
-	g := func(yield func(U) bool) {
+	return Err(func(yield func(U) bool) error {
 		for val := range inp {
-			var out U
-
-			out, err = f(val)
+			out, err := f(val)
 			if err != nil {
-				return
+				return err
 			}
 			if !yield(out) {
-				return
+				return nil
 			}
 		}
-	}
-
-	return g, &err
+		return nil
+	})
 }
 
 // Map2 returns an iterator over the pairs of values of inp transformed by the function f.
@@ -48,22 +43,16 @@ func Map2[T1, U1, T2, U2 any](inp iter.Seq2[T1, U1], f func(T1, U1) (T2, U2)) it
 // If the mapping function returns an error,
 // iteration stops and the error is available by dereferencing the returned pointer.
 func Map2x[T1, U1, T2, U2 any](inp iter.Seq2[T1, U1], f func(T1, U1) (T2, U2, error)) (iter.Seq2[T2, U2], *error) {
-	var err error
-
-	g := func(yield func(T2, U2) bool) {
+	return Err2(func(yield func(T2, U2) bool) error {
 		for k, v := range inp {
-			var out1 T2
-			var out2 U2
-
-			out1, out2, err = f(k, v)
+			out1, out2, err := f(k, v)
 			if err != nil {
-				return
+				return err
 			}
 			if !yield(out1, out2) {
-				return
+				return nil
 			}
 		}
-	}
-
-	return g, &err
+		return nil
+	})
 }

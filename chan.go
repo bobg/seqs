@@ -23,27 +23,22 @@ func FromChan[T any](inp <-chan T) iter.Seq[T] {
 // (such as [context.Canceled] or [context.DeadlineExceeded]),
 // but only after iteration is done.
 func FromChanContext[T any](ctx context.Context, inp <-chan T) (iter.Seq[T], *error) {
-	var err error
-
-	f := func(yield func(T) bool) {
+	return Err(func(yield func(T) bool) error {
 		for {
 			select {
 			case val, ok := <-inp:
 				if !ok {
-					return
+					return nil
 				}
 				if !yield(val) {
-					return
+					return nil
 				}
 
 			case <-ctx.Done():
-				err = ctx.Err()
-				return
+				return ctx.Err()
 			}
 		}
-	}
-
-	return f, &err
+	})
 }
 
 // ToChan launches a goroutine that consumes an iterator and sends its values to a channel.
