@@ -22,19 +22,20 @@ func Accum[T, A any](inp iter.Seq[T], init A, f func(A, T) A) iter.Seq[A] {
 // The error pointer that Accumx returns may be dereferenced to discover that error,
 // but only after the output iterator is fully consumed.
 func Accumx[T, A any](inp iter.Seq[T], init A, f func(A, T) (A, error)) (iter.Seq[A], *error) {
-	var err error
-
-	seq := func(yield func(A) bool) {
+	return Err(func(yield func(A) bool) error {
 		acc := init
 		for val := range inp {
+			var err error
 			acc, err = f(acc, val)
-			if err != nil || !yield(acc) {
-				return
+			if err != nil {
+				return err
+			}
+			if !yield(acc) {
+				return nil
 			}
 		}
-	}
-
-	return seq, &err
+		return nil
+	})
 }
 
 // Accum2 repeatedly applies a function to the elements of a pairwise iterator
@@ -57,17 +58,18 @@ func Accum2[T, U, A any](inp iter.Seq2[T, U], init A, f func(A, T, U) A) iter.Se
 // The error pointer that Accum2x returns may be dereferenced to discover that error,
 // but only after the output iterator is fully consumed.
 func Accum2x[T, U, A any](inp iter.Seq2[T, U], init A, f func(A, T, U) (A, error)) (iter.Seq[A], *error) {
-	var err error
-
-	seq := func(yield func(A) bool) {
+	return Err(func(yield func(A) bool) error {
 		acc := init
 		for t, u := range inp {
+			var err error
 			acc, err = f(acc, t, u)
-			if err != nil || !yield(acc) {
-				return
+			if err != nil {
+				return err
+			}
+			if !yield(acc) {
+				return nil
 			}
 		}
-	}
-
-	return seq, &err
+		return nil
+	})
 }

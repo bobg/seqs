@@ -13,22 +13,18 @@ import (
 // The caller can dereference the returned error pointer to check for errors
 // but only after iteration is done.
 func Words(r io.Reader) (iter.Seq[string], *error) {
-	var err error
-
-	f := func(yield func(string) bool) {
+	return Err(func(yield func(string) bool) error {
 		sc := bufio.NewScanner(r)
 		sc.Split(bufio.ScanWords)
 
-		defer func() { err = sc.Err() }()
-
 		for sc.Scan() {
 			if !yield(sc.Text()) {
-				return
+				break
 			}
 		}
-	}
 
-	return f, &err
+		return sc.Err()
+	})
 }
 
 // Lines produces an iterator over the text lines in r.
@@ -40,19 +36,15 @@ func Words(r io.Reader) (iter.Seq[string], *error) {
 // The caller can dereference the returned error pointer to check for errors
 // but only after iteration is done.
 func Lines(r io.Reader) (iter.Seq[string], *error) {
-	var err error
-
-	f := func(yield func(string) bool) {
+	return Err(func(yield func(string) bool) error {
 		sc := bufio.NewScanner(r)
 		for sc.Scan() {
 			if !yield(sc.Text()) {
-				return
+				break
 			}
 		}
-		err = sc.Err()
-	}
-
-	return f, &err
+		return sc.Err()
+	})
 }
 
 // LongLines produces an iterator of readers,
