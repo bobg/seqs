@@ -2,6 +2,21 @@ package seqs
 
 import "iter"
 
+// FirstUntil copies the input iterator to the output
+// until the first element that causes f to return true.
+func FirstUntil[T any](inp iter.Seq[T], f func(T) bool) iter.Seq[T] {
+	return func(yield func(T) bool) {
+		for val := range inp {
+			if f(val) {
+				return
+			}
+			if !yield(val) {
+				return
+			}
+		}
+	}
+}
+
 // First returns the first value of seq and true.
 // If seq is empty, it returns the zero value of T and false.
 //
