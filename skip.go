@@ -4,8 +4,8 @@ import "iter"
 
 // SkipUntil copies the input iterator to the output,
 // discarding the initial elements until the first one that causes f to return true.
-// That element and the remaining elements of inp are included in the output,
-// and f is not called again.
+// It is the same as SkipWhile(inp, notF),
+// where notF is the boolean inverse of f.
 func SkipUntil[T any](inp iter.Seq[T], f func(T) bool) iter.Seq[T] {
 	skipping := true
 	return Filter(inp, func(val T) bool {
@@ -17,6 +17,14 @@ func SkipUntil[T any](inp iter.Seq[T], f func(T) bool) iter.Seq[T] {
 		}
 		return !skipping
 	})
+}
+
+// SkipWhile copies the input iterator to the output,
+// discarding the initial elements while f returns true.
+// It is the same as SkipUntil(inp, notF),
+// where notF is the boolean inverse of f.
+func SkipWhile[T any](inp iter.Seq[T], f func(T) bool) iter.Seq[T] {
+	return SkipUntil(inp, func(val T) bool { return !f(val) })
 }
 
 // SkipN copies the input iterator to the output,
