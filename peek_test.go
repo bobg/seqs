@@ -10,7 +10,8 @@ func TestPeek(t *testing.T) {
 		ints   = Ints(1, 1)
 		first3 = Limit(ints, 3)
 	)
-	got, ok, orig := Peek(first3)
+	got, ok, orig, stop := Peek(first3)
+	defer stop()
 	if !ok {
 		t.Error("got !ok, want ok")
 	}
@@ -23,7 +24,8 @@ func TestPeek(t *testing.T) {
 		t.Errorf("got %v, want %v", gotOrig, wantOrig)
 	}
 
-	_, ok, _ = Peek(Empty[int])
+	_, ok, _, stop = Peek(Empty[int])
+	defer stop()
 	if ok {
 		t.Error("got ok, want !ok")
 	}
@@ -36,7 +38,8 @@ func TestPeek2(t *testing.T) {
 		zipped  = ZipVals(ints, squares)
 		first3  = Limit2(zipped, 3)
 	)
-	gotA, gotB, ok, orig := Peek2(first3)
+	gotA, gotB, ok, orig, stop := Peek2(first3)
+	defer stop()
 	if !ok {
 		t.Error("got !ok, want ok")
 	}
@@ -49,7 +52,8 @@ func TestPeek2(t *testing.T) {
 		t.Errorf("got %v, want %v", gotOrig, wantOrig)
 	}
 
-	_, _, ok, _ = Peek2(Empty2[int, int])
+	_, _, ok, _, stop = Peek2(Empty2[int, int])
+	defer stop()
 	if ok {
 		t.Error("got ok, want !ok")
 	}

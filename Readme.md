@@ -1,7 +1,7 @@
 # Seqs - functions for operating on and with Go iterable sequences
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/bobg/seqs.svg)](https://pkg.go.dev/github.com/bobg/seqs)
-[![Go Report Card](https://goreportcard.com/badge/github.com/bobg/seqs)](https://goreportcard.com/report/github.com/bobg/seqs)
+[![Go Reference](https://pkg.go.dev/badge/github.com/bobg/seqs/v2.svg)](https://pkg.go.dev/github.com/bobg/seqs/v2)
+[![Go Report Card](https://goreportcard.com/badge/github.com/bobg/seqs/v2)](https://goreportcard.com/report/github.com/bobg/seqs/v2)
 [![Tests](https://github.com/bobg/seqs/actions/workflows/go.yml/badge.svg)](https://github.com/bobg/seqs/actions/workflows/go.yml)
 [![Coverage Status](https://coveralls.io/repos/github/bobg/seqs/badge.svg?branch=main)](https://coveralls.io/github/bobg/seqs?branch=main)
 

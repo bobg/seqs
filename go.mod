@@ -1,4 +1,4 @@
-module github.com/bobg/seqs
+module github.com/bobg/seqs/v2
 
 go 1.23
 
