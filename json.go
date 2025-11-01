@@ -67,7 +67,7 @@ func JSONTokens(r io.Reader, opts ...jsontext.Options) (iter.Seq[jsontext.Token]
 //   - map[string]any for objects
 //   - strings for strings
 //   - boolean for booleans
-//   - any(nil) for null
+//   - [Null] for null
 //
 // and, for numbers:
 //
@@ -75,7 +75,8 @@ func JSONTokens(r io.Reader, opts ...jsontext.Options) (iter.Seq[jsontext.Token]
 //   - uint64, if that can; otherwise
 //   - float64.
 //
-// The input may contain multiple top-level JSON value.
+// The input may contain multiple top-level JSON values,
+// each of which will be paired with the empty pointer "".
 // If the input ends in the middle of a JSON value,
 // JSONValues produces an [io.ErrUnexpectedEOF] error.
 //
@@ -85,10 +86,7 @@ func JSONValues(tokens iter.Seq[jsontext.Token]) (iter.Seq2[jsontext.Pointer, an
 	var outerErr error
 
 	f := func(yield func(jsontext.Pointer, any) bool) {
-		var (
-			stack      []*stackItem
-			nextObjKey *string // nil means expecting a map key (when top-of-stack is a map)
-		)
+		var stack []any // []any for arrays, *stackMap for objs
 
 		for tok := range tokens {
 			var (
@@ -99,7 +97,7 @@ func JSONValues(tokens iter.Seq[jsontext.Token]) (iter.Seq2[jsontext.Pointer, an
 
 			switch kind {
 			case 'n':
-				// val remains nil
+				val = Null{}
 
 			case 'f':
 				val = false
@@ -120,7 +118,7 @@ func JSONValues(tokens iter.Seq[jsontext.Token]) (iter.Seq2[jsontext.Pointer, an
 				val = num
 
 			case '{':
-				stack = append(stack, &stackItem{val: make(map[string]any)})
+				stack = append(stack, &stackMap{m: make(map[string]any)})
 				continue
 
 			case '}':
@@ -129,16 +127,20 @@ func JSONValues(tokens iter.Seq[jsontext.Token]) (iter.Seq2[jsontext.Pointer, an
 					return
 				}
 				top := stack[len(stack)-1]
-				obj, ok := top.val.(map[string]any)
+				sm, ok := top.(*stackMap)
 				if !ok {
 					outerErr = fmt.Errorf("unexpected close brace in non-object")
 					return
 				}
-				val = obj
+				if sm.nextKey != nil {
+					outerErr = fmt.Errorf("unexpected close brace awaiting object key")
+					return
+				}
+				val = sm.m
 				stack = stack[:len(stack)-1]
 
 			case '[':
-				stack = append(stack, &stackItem{val: []any(nil)})
+				stack = append(stack, []any(nil))
 				continue
 
 			case ']':
@@ -147,12 +149,12 @@ func JSONValues(tokens iter.Seq[jsontext.Token]) (iter.Seq2[jsontext.Pointer, an
 					return
 				}
 				top := stack[len(stack)-1]
-				obj, ok := top.val.([]any)
+				array, ok := top.([]any)
 				if !ok {
 					outerErr = fmt.Errorf("unexpected close bracket in non-array")
 					return
 				}
-				val = obj
+				val = array
 				stack = stack[:len(stack)-1]
 
 			default:
@@ -162,23 +164,23 @@ func JSONValues(tokens iter.Seq[jsontext.Token]) (iter.Seq2[jsontext.Pointer, an
 
 			if len(stack) > 0 {
 				top := stack[len(stack)-1]
-				switch topval := top.val.(type) {
-				case map[string]any:
-					if nextObjKey == nil {
+				switch topItem := top.(type) {
+				case *stackMap:
+					if topItem.nextKey == nil {
 						if kind != '"' {
 							outerErr = fmt.Errorf("got %s token, want string", kind)
 							return
 						}
-						nextObjKey = &str
-						top.key = str
+						topItem.nextKey = &str
+						topItem.lastKey = str
 						continue
 					}
-					topval[*nextObjKey] = val
-					nextObjKey = nil
+					topItem.m[*topItem.nextKey] = val
+					topItem.nextKey = nil
 
 				case []any:
-					topval = append(topval, val)
-					top.val = topval
+					topItem = append(topItem, val)
+					stack[len(stack)-1] = topItem
 
 				default:
 					outerErr = fmt.Errorf("internal error: unexpected %T on the stack", top)
@@ -187,16 +189,20 @@ func JSONValues(tokens iter.Seq[jsontext.Token]) (iter.Seq2[jsontext.Pointer, an
 			}
 
 			var pointer jsontext.Pointer
-			for _, s := range stack {
-				switch sval := s.val.(type) {
-				case map[string]any:
-					pointer = pointer.AppendToken(s.key)
+			for i, s := range stack {
+				switch item := s.(type) {
+				case *stackMap:
+					pointer = pointer.AppendToken(item.lastKey)
 
 				case []any:
-					pointer = pointer.AppendToken(strconv.Itoa(len(sval) - 1))
+					idx := len(item)
+					if i == len(stack)-1 {
+						idx--
+					}
+					pointer = pointer.AppendToken(strconv.Itoa(idx))
 
 				default:
-					outerErr = fmt.Errorf("internal error: unexpected %T on stack", sval)
+					outerErr = fmt.Errorf("internal error: unexpected %T on stack", item)
 					return
 				}
 			}
@@ -215,9 +221,13 @@ func JSONValues(tokens iter.Seq[jsontext.Token]) (iter.Seq2[jsontext.Pointer, an
 	return f, &outerErr
 }
 
-type stackItem struct {
-	val any    // []any for arrays, map[string]any for objs
-	key string // when val is a map[string]any, this is the latest key seen
+// Null is the type of a JSON "null" value.
+type Null struct{}
+
+type stackMap struct {
+	m       map[string]any
+	nextKey *string // when nil, obj is awaiting a key, otherwise obj is awaiting a value (or a close brace)
+	lastKey string  // last key to receive a value
 }
 
 // Returns an int64 if possible, otherwise a uint64 if possible, otherwise a float64.
