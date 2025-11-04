@@ -23,8 +23,8 @@ func Dup[T any](inp iter.Seq[T], n int) []iter.Seq[T] {
 		offsets   = make([]int, n)
 		result    []iter.Seq[T]
 
-		nrunning int32 = int32(n)
-		done           = make(chan struct{})
+		nrunning = int32(n)
+		done     = make(chan struct{})
 	)
 
 	go func() {

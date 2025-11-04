@@ -20,7 +20,7 @@ func Limit[T any](seq iter.Seq[T], n int) iter.Seq[T] {
 	}
 }
 
-// Limit returns an iterator over the elements of seq that stops after n pairs
+// Limit2 returns an iterator over the elements of seq that stops after n pairs
 // (or when seq is exhausted, whichever comes first).
 func Limit2[T, U any](seq iter.Seq2[T, U], n int) iter.Seq2[T, U] {
 	return func(yield func(T, U) bool) {
