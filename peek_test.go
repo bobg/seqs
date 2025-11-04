@@ -54,3 +54,67 @@ func TestPeek2(t *testing.T) {
 		t.Error("got ok, want !ok")
 	}
 }
+
+func TestPeeker(t *testing.T) {
+	var (
+		ints   = Ints(1, 1)
+		first3 = Limit(ints, 3)
+	)
+
+	next, peek, stop := Peeker(first3)
+	defer stop()
+
+	got, ok := peek()
+	if !ok {
+		t.Error("got !ok, want ok")
+	}
+	if got != 1 {
+		t.Errorf("got %d, want 1", got)
+	}
+
+	gotOrig := slices.Collect(FromPull(next))
+	wantOrig := []int{1, 2, 3}
+	if !slices.Equal(gotOrig, wantOrig) {
+		t.Errorf("got %v, want %v", gotOrig, wantOrig)
+	}
+
+	_, peek, stop = Peeker(Empty[int])
+	defer stop()
+
+	if _, ok = peek(); ok {
+		t.Error("got ok, want !ok")
+	}
+}
+
+func TestPeeker2(t *testing.T) {
+	var (
+		ints    = Ints(1, 1)
+		squares = Map(Ints(1, 1), func(i int) int { return i * i })
+		zipped  = ZipVals(ints, squares)
+		first3  = Limit2(zipped, 3)
+	)
+
+	next, peek, stop := Peeker2(first3)
+	defer stop()
+
+	gotA, gotB, ok := peek()
+	if !ok {
+		t.Error("got !ok, want ok")
+	}
+	if gotA != 1 || gotB != 1 {
+		t.Errorf("got %d,%d, want 1,1", gotA, gotB)
+	}
+
+	gotOrig := slices.Collect(ToPairs(FromPull2(next)))
+	wantOrig := []Pair[int, int]{{1, 1}, {2, 4}, {3, 9}}
+	if !slices.Equal(gotOrig, wantOrig) {
+		t.Errorf("got %v, want %v", gotOrig, wantOrig)
+	}
+
+	_, peek, stop = Peeker2(Empty2[int, int])
+	defer stop()
+
+	if _, _, ok = peek(); ok {
+		t.Error("got ok, want !ok")
+	}
+}

@@ -1,3 +1,4 @@
+// Package seqs is a collection of utilities for working with Go iterators.
 package seqs
 
 import (
@@ -9,6 +10,38 @@ import (
 // From creates an iterator over the given items.
 func From[T any](items ...T) iter.Seq[T] {
 	return slices.Values(items)
+}
+
+// FromPull creates an [iter.Seq] from a pull iterator
+// (such as is created by [iter.Pull]).
+func FromPull[T any](next func() (T, bool)) iter.Seq[T] {
+	return func(yield func(T) bool) {
+		for {
+			val, ok := next()
+			if !ok {
+				return
+			}
+			if !yield(val) {
+				return
+			}
+		}
+	}
+}
+
+// FromPull2 creates an [iter.Seq2] from a pull iterator
+// (such as is created by [iter.Pull2]).
+func FromPull2[T, U any](next func() (T, U, bool)) iter.Seq2[T, U] {
+	return func(yield func(T, U) bool) {
+		for {
+			valT, valU, ok := next()
+			if !ok {
+				return
+			}
+			if !yield(valT, valU) {
+				return
+			}
+		}
+	}
 }
 
 // Pair is a generic pair of values.

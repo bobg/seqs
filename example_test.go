@@ -157,15 +157,18 @@ func ExamplePages() {
 	// [10]
 }
 
-func ExamplePeek() {
+func ExamplePeeker() {
 	var (
 		ints   = seqs.Ints(1, 1)     // All integers starting at 1
 		first3 = seqs.Limit(ints, 3) // First three integers
 	)
 
-	peeked, ok, first3 := seqs.Peek(first3)
+	next, peek, stop := seqs.Peeker(first3)
+	defer stop()
+
+	peeked, ok := peek()
 	if ok {
-		all3 := slices.Collect(first3)
+		all3 := slices.Collect(seqs.FromPull(next))
 		fmt.Printf("Peeked value is %d, full sequence is %v\n", peeked, all3)
 	} else {
 		fmt.Println("Sequence is empty")

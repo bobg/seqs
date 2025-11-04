@@ -75,7 +75,7 @@ func sqlHelper[T any](ctx context.Context, rows *sql.Rows, yield func(T) bool) e
 		tt = reflect.TypeOf(t)
 	)
 
-	if isSqlNull(tt) {
+	if isSQLNull(tt) {
 		return sqlHelperScalar[T](ctx, rows, yield)
 	}
 
@@ -91,7 +91,7 @@ func sqlHelper[T any](ctx context.Context, rows *sql.Rows, yield func(T) bool) e
 	}
 }
 
-func isSqlNull(tt reflect.Type) bool {
+func isSQLNull(tt reflect.Type) bool {
 	if tt.PkgPath() != "database/sql" {
 		return false
 	}

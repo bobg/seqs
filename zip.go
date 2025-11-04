@@ -2,7 +2,7 @@ package seqs
 
 import "iter"
 
-// A Zipped is a pair of zipped values, one of which may be missing,
+// Zipped is a pair of zipped values, one of which may be missing,
 // drawn from two different sequences.
 type Zipped[V1, V2 any] struct {
 	V1  V1
@@ -49,6 +49,8 @@ func Zip[V1, V2 any](x iter.Seq[V1], y iter.Seq[V2]) iter.Seq[Zipped[V1, V2]] {
 	}
 }
 
+// A Zipped2 is a pair of zipped key-value pairs,
+// one of which may be missing, drawn from two different sequences.
 type Zipped2[K1, V1, K2, V2 any] struct {
 	K1  K1
 	V1  V1
@@ -97,9 +99,9 @@ func Zip2[K1, V1, K2, V2 any](x iter.Seq2[K1, V1], y iter.Seq2[K2, V2]) iter.Seq
 	}
 }
 
-// Zip takes two iterators and produces a new iterator containing pairs of corresponding elements.
+// ZipVals takes two iterators and produces a new iterator containing pairs of corresponding elements.
 // If one input iterator ends before the other,
-// Zip produces zero values of the appropriate type in constructing pairs.
+// ZipVals produces zero values of the appropriate type in constructing pairs.
 func ZipVals[T, U any](t iter.Seq[T], u iter.Seq[U]) iter.Seq2[T, U] {
 	return func(yield func(T, U) bool) {
 		next, stop := iter.Pull(u)
