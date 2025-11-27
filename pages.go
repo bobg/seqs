@@ -1,9 +1,6 @@
 package seqs
 
-import (
-	"fmt"
-	"iter"
-)
+import "iter"
 
 // Pages converts an iterator of items into an iterator of pages of items.
 // Each page is a slice of up to pageSize items.
@@ -33,7 +30,6 @@ func FromPages[T any](nextpage func() ([]T, bool)) iter.Seq[T] {
 	return func(yield func(T) bool) {
 		for {
 			page, ok := nextpage()
-			fmt.Printf("xxx got a page and %v\n", ok)
 			if !ok {
 				return
 			}
