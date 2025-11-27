@@ -18,3 +18,23 @@ func TestPage(t *testing.T) {
 		t.Errorf("got %v, want %v", got, want)
 	}
 }
+
+func TestFromPages(t *testing.T) {
+	var (
+		pages   = [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10}}
+		pagenum = 0
+		seq     = FromPages(func() ([]int, bool) {
+			if pagenum >= len(pages) {
+				return nil, false
+			}
+			result := pages[pagenum]
+			pagenum++
+			return result, pagenum <= len(pages)
+		})
+		got  = slices.Collect(seq)
+		want = []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	)
+	if !slices.Equal(got, want) {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}
