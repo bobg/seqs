@@ -17,6 +17,8 @@ func Empty2[T, U any](func(T, U) bool) {}
 // It returns a copy of the original iterator
 // (with any consumed element restored)
 // and a boolean that is true for empty and false otherwise.
+//
+// Deprecated: Uses the deprecated Peek function. You can use [Peeker] to check for emptiness instead.
 func CheckEmpty[T any](inp iter.Seq[T]) (iter.Seq[T], bool) {
 	_, ok, seq := Peek(inp)
 	return seq, !ok
@@ -27,6 +29,8 @@ func CheckEmpty[T any](inp iter.Seq[T]) (iter.Seq[T], bool) {
 // It returns a copy of the original iterator
 // (with any consumed pair restored)
 // and a boolean that is true for empty and false otherwise.
+//
+// Deprecated: Uses the deprecated Peek2 function. You can use [Peeker2] to check for emptiness instead.
 func CheckEmpty2[T, U any](inp iter.Seq2[T, U]) (iter.Seq2[T, U], bool) {
 	_, _, ok, seq := Peek2(inp)
 	return seq, !ok
