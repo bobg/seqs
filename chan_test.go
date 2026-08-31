@@ -67,7 +67,7 @@ func TestToChanContext(t *testing.T) {
 func TestFromChan(t *testing.T) {
 	ch := make(chan int)
 	go func() {
-		for i := 0; i < 3; i++ {
+		for i := range 3 {
 			ch <- i
 		}
 		close(ch)
