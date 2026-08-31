@@ -20,13 +20,14 @@ func TestMarshalEncode(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		got, want := strings.TrimSpace(buf.String()), "[1,2,3]"
+		const want = "[1,2,3]"
+		got := strings.TrimSpace(buf.String())
 		if got != want {
 			t.Errorf("got %q, want %q", got, want)
 		}
 	})
 
-	t.Run("empty", func(t *testing.T) {
+	t.Run("empty without option", func(t *testing.T) {
 		var buf bytes.Buffer
 		enc := jsontext.NewEncoder(&buf)
 
@@ -34,7 +35,38 @@ func TestMarshalEncode(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		got, want := strings.TrimSpace(buf.String()), "null"
+		const want = "[]"
+		got := strings.TrimSpace(buf.String())
+		if got != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("empty with FormatNilSliceAsNull true", func(t *testing.T) {
+		var buf bytes.Buffer
+		enc := jsontext.NewEncoder(&buf)
+
+		if err := JSONMarshalEncode(enc, Empty[int], json.FormatNilSliceAsNull(true)); err != nil {
+			t.Fatal(err)
+		}
+
+		const want = "null"
+		got := strings.TrimSpace(buf.String())
+		if got != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("empty with FormatNilSliceAsNull false", func(t *testing.T) {
+		var buf bytes.Buffer
+		enc := jsontext.NewEncoder(&buf)
+
+		if err := JSONMarshalEncode(enc, Empty[int], json.FormatNilSliceAsNull(false)); err != nil {
+			t.Fatal(err)
+		}
+
+		const want = "[]"
+		got := strings.TrimSpace(buf.String())
 		if got != want {
 			t.Errorf("got %q, want %q", got, want)
 		}
@@ -64,7 +96,8 @@ func TestJSONMarshalEncode2(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		got, want := strings.TrimSpace(buf.String()), `{"a":1,"b":2}`
+		const want = `{"a":1,"b":2}`
+		got := strings.TrimSpace(buf.String())
 		if got != want {
 			t.Errorf("got %q, want %q", got, want)
 		}
@@ -78,7 +111,8 @@ func TestJSONMarshalEncode2(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		got, want := strings.TrimSpace(buf.String()), "null"
+		const want = "null"
+		got := strings.TrimSpace(buf.String())
 		if got != want {
 			t.Errorf("got %q, want %q", got, want)
 		}
