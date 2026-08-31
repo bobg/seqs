@@ -145,9 +145,8 @@ func TestSQL(t *testing.T) {
 		it, errptr := SQL[*int](ctx, db, q)
 		_ = slices.Collect(it)
 
-		var e sqlKindError
-		if !errors.As(*errptr, &e) {
-			e.kind = reflect.TypeOf(0).Kind()
+		if e, ok := errors.AsType[sqlKindError](*errptr); !ok {
+			e.kind = reflect.TypeFor[int]().Kind()
 			t.Errorf("got %v, want %v", err, e)
 		}
 	})

@@ -13,7 +13,7 @@ import (
 // QueryerContext is a minimal interface satisfied by *sql.DB and *sql.Tx
 // (from database/sql).
 type QueryerContext interface {
-	QueryContext(context.Context, string, ...interface{}) (*sql.Rows, error)
+	QueryContext(context.Context, string, ...any) (*sql.Rows, error)
 }
 
 // SQL performs a query against db
@@ -114,7 +114,7 @@ func sqlHelperStruct[T any](ctx context.Context, rowtype reflect.Type, rows *sql
 			ptrs      = make([]any, 0, nfields)
 		)
 
-		for i := 0; i < nfields; i++ {
+		for i := range nfields {
 			addr := rowval.Field(i).Addr()
 			ptrs = append(ptrs, addr.Interface())
 		}

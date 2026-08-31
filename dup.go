@@ -41,7 +41,7 @@ func Dup[T any](inp iter.Seq[T], n int) []iter.Seq[T] {
 		}
 	}()
 
-	for i := 0; i < n; i++ {
+	for i := range n {
 		helper := func(yield func(T) bool) bool {
 			mu.Lock()
 			defer mu.Unlock()
