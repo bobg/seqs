@@ -12,8 +12,10 @@ import (
 
 func TestMarshalEncode(t *testing.T) {
 	t.Run("non-empty", func(t *testing.T) {
-		var buf bytes.Buffer
-		enc := jsontext.NewEncoder(&buf)
+		var (
+			buf = new(bytes.Buffer)
+			enc = jsontext.NewEncoder(buf)
+		)
 
 		seq := slices.Values([]int{1, 2, 3})
 		if err := JSONMarshalEncode(enc, seq); err != nil {
@@ -28,8 +30,10 @@ func TestMarshalEncode(t *testing.T) {
 	})
 
 	t.Run("empty without option", func(t *testing.T) {
-		var buf bytes.Buffer
-		enc := jsontext.NewEncoder(&buf)
+		var (
+			buf = new(bytes.Buffer)
+			enc = jsontext.NewEncoder(buf)
+		)
 
 		if err := JSONMarshalEncode(enc, Empty[int]); err != nil {
 			t.Fatal(err)
@@ -43,8 +47,10 @@ func TestMarshalEncode(t *testing.T) {
 	})
 
 	t.Run("empty with FormatNilSliceAsNull true", func(t *testing.T) {
-		var buf bytes.Buffer
-		enc := jsontext.NewEncoder(&buf)
+		var (
+			buf = new(bytes.Buffer)
+			enc = jsontext.NewEncoder(buf)
+		)
 
 		if err := JSONMarshalEncode(enc, Empty[int], json.FormatNilSliceAsNull(true)); err != nil {
 			t.Fatal(err)
@@ -58,8 +64,44 @@ func TestMarshalEncode(t *testing.T) {
 	})
 
 	t.Run("empty with FormatNilSliceAsNull false", func(t *testing.T) {
-		var buf bytes.Buffer
-		enc := jsontext.NewEncoder(&buf)
+		var (
+			buf = new(bytes.Buffer)
+			enc = jsontext.NewEncoder(buf)
+		)
+
+		if err := JSONMarshalEncode(enc, Empty[int], json.FormatNilSliceAsNull(false)); err != nil {
+			t.Fatal(err)
+		}
+
+		const want = "[]"
+		got := strings.TrimSpace(buf.String())
+		if got != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("empty with FormatNilSliceAsNull true in encoder options", func(t *testing.T) {
+		var (
+			buf = new(bytes.Buffer)
+			enc = jsontext.NewEncoder(buf, json.FormatNilSliceAsNull(true))
+		)
+
+		if err := JSONMarshalEncode(enc, Empty[int]); err != nil {
+			t.Fatal(err)
+		}
+
+		const want = "null"
+		got := strings.TrimSpace(buf.String())
+		if got != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("empty with FormatNilSliceAsNull true in encoder options overriden by call option", func(t *testing.T) {
+		var (
+			buf = new(bytes.Buffer)
+			enc = jsontext.NewEncoder(buf, json.FormatNilSliceAsNull(true))
+		)
 
 		if err := JSONMarshalEncode(enc, Empty[int], json.FormatNilSliceAsNull(false)); err != nil {
 			t.Fatal(err)
@@ -73,8 +115,10 @@ func TestMarshalEncode(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		var buf bytes.Buffer
-		enc := jsontext.NewEncoder(&buf)
+		var (
+			buf = new(bytes.Buffer)
+			enc = jsontext.NewEncoder(buf)
+		)
 
 		badSeq := func(yield func(errTypeVal) bool) {
 			yield(errTypeVal{})
@@ -88,8 +132,10 @@ func TestMarshalEncode(t *testing.T) {
 
 func TestJSONMarshalEncode2(t *testing.T) {
 	t.Run("non-empty", func(t *testing.T) {
-		var buf bytes.Buffer
-		enc := jsontext.NewEncoder(&buf)
+		var (
+			buf = new(bytes.Buffer)
+			enc = jsontext.NewEncoder(buf)
+		)
 
 		seq := FromPairs(slices.Values([]Pair[string, int]{{"a", 1}, {"b", 2}}))
 		if err := JSONMarshalEncode2(enc, seq); err != nil {
@@ -104,8 +150,10 @@ func TestJSONMarshalEncode2(t *testing.T) {
 	})
 
 	t.Run("empty", func(t *testing.T) {
-		var buf bytes.Buffer
-		enc := jsontext.NewEncoder(&buf)
+		var (
+			buf = new(bytes.Buffer)
+			enc = jsontext.NewEncoder(buf)
+		)
 
 		if err := JSONMarshalEncode2(enc, Empty2[string, int]); err != nil {
 			t.Fatal(err)
@@ -119,8 +167,10 @@ func TestJSONMarshalEncode2(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		var buf bytes.Buffer
-		enc := jsontext.NewEncoder(&buf)
+		var (
+			buf = new(bytes.Buffer)
+			enc = jsontext.NewEncoder(buf)
+		)
 
 		badSeq := func(yield func(string, errTypeVal) bool) {
 			yield("foo", errTypeVal{})
@@ -316,17 +366,18 @@ func TestJSONUnmarshalDecode2(t *testing.T) {
 }
 
 func TestRoundTrip(t *testing.T) {
-	input := []string{"foo", "bar", "baz"}
-	inSeq := slices.Values(input)
-
-	var buf bytes.Buffer
-	enc := jsontext.NewEncoder(&buf)
+	var (
+		input = []string{"foo", "bar", "baz"}
+		inSeq = slices.Values(input)
+		buf   = new(bytes.Buffer)
+		enc   = jsontext.NewEncoder(buf)
+	)
 
 	if err := JSONMarshalEncode(enc, inSeq); err != nil {
 		t.Fatalf("MarshalEncode error: %v", err)
 	}
 
-	dec := jsontext.NewDecoder(&buf)
+	dec := jsontext.NewDecoder(buf)
 	outSeq, errptr := JSONUnmarshalDecode[string](dec)
 	got := slices.Collect(outSeq)
 	if err := *errptr; err != nil {
@@ -339,17 +390,18 @@ func TestRoundTrip(t *testing.T) {
 }
 
 func TestRoundTrip2(t *testing.T) {
-	input := []Pair[string, string]{{"foo", "a"}, {"bar", "b"}}
-	inSeq := FromPairs(slices.Values(input))
-
-	var buf bytes.Buffer
-	enc := jsontext.NewEncoder(&buf)
+	var (
+		input = []Pair[string, string]{{"foo", "a"}, {"bar", "b"}}
+		inSeq = FromPairs(slices.Values(input))
+		buf   = new(bytes.Buffer)
+		enc   = jsontext.NewEncoder(buf)
+	)
 
 	if err := JSONMarshalEncode2(enc, inSeq); err != nil {
 		t.Fatalf("JSONMarshalEncode2 error: %v", err)
 	}
 
-	dec := jsontext.NewDecoder(&buf)
+	dec := jsontext.NewDecoder(buf)
 	outSeq, errptr := JSONUnmarshalDecode2[string](dec)
 	got := slices.Collect(ToPairs(outSeq))
 	if err := *errptr; err != nil {

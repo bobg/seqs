@@ -8,14 +8,19 @@ import (
 )
 
 // JSONMarshalEncode encodes a sequence of values as a JSON array.
-// If the sequence is empty and the json.FormatNilSliceAsNull option is present in opts,
-// it encodes a JSON null value instead. Otherwise, an empty sequence is encoded as an empty JSON array.
+// If the sequence is empty and the [json.FormatNilSliceAsNull] option is present
+// (either in the encoder’s options or in opts),
+// it encodes a JSON null value instead.
+// Otherwise, an empty sequence is encoded as an empty JSON array.
 func JSONMarshalEncode[T any](out *jsontext.Encoder, in iter.Seq[T], opts ...json.Options) error {
 	next, peek, stop := Peeker(in)
 	defer stop()
 
 	if _, ok := peek(); !ok {
-		formatNil, _ := json.GetOption(json.JoinOptions(opts...), json.FormatNilSliceAsNull)
+		formatNil, _ := json.GetOption(
+			json.JoinOptions(out.Options(), json.JoinOptions(opts...)),
+			json.FormatNilSliceAsNull,
+		)
 		if formatNil {
 			return out.WriteToken(jsontext.Null)
 		}
