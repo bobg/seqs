@@ -1,10 +1,6 @@
 package seqs
 
-import (
-	"iter"
-
-	"github.com/bobg/go-generics/v4/slices"
-)
+import "iter"
 
 // Last returns the last element of the input sequence and true.
 // If the input is empty, Last returns the zero value of T instead, and false.
@@ -52,7 +48,7 @@ func LastN[T any](inp iter.Seq[T], n int) []T {
 		buf[start] = val
 		start = (start + 1) % n
 	}
-	slices.Rotate(buf, -start)
+	rotateSlice(buf, -start)
 	return buf
 }
 
@@ -73,6 +69,25 @@ func LastN2[T, U any](inp iter.Seq2[T, U], n int) []Pair[T, U] {
 		buf[start] = Pair[T, U]{x, y}
 		start = (start + 1) % n
 	}
-	slices.Rotate(buf, -start)
+	rotateSlice(buf, -start)
 	return buf
+}
+
+// The following is duplicated from github.com/bobg/go-generics/v4/slices to avoid a dependency on that package.
+func rotateSlice[T any, S ~[]T](s S, n int) {
+	if n < 0 {
+		// Convert left-rotation to right-rotation.
+		n = -n
+		n %= len(s)
+		n = len(s) - n
+	} else {
+		n %= len(s)
+	}
+	if n == 0 {
+		return
+	}
+	tmp := make([]T, n)
+	copy(tmp, s[len(s)-n:])
+	copy(s[n:], s)
+	copy(s, tmp)
 }
