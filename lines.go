@@ -62,7 +62,7 @@ func LongLines(r io.Reader) (iter.Seq[io.Reader], *error) {
 		br = bufio.NewReader(r)
 	}
 
-	return Go(func(ch chan<- io.Reader) error {
+	return Go(func(ch chan<- io.Reader) (err error) {
 		var (
 			pr    io.Reader
 			pw    io.WriteCloser
@@ -72,7 +72,8 @@ func LongLines(r io.Reader) (iter.Seq[io.Reader], *error) {
 		// Defer closing only the final value of pw.
 		defer func() {
 			if pw != nil {
-				pw.Close()
+				err2 := pw.Close()
+				err = errors.Join(err, err2)
 			}
 		}()
 

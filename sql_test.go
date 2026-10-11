@@ -24,7 +24,7 @@ func TestSQL(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(f.Name())
+	defer os.Remove(f.Name()) // nolint:errcheck
 	if err = f.Close(); err != nil {
 		t.Fatal(err)
 	}
