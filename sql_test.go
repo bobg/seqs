@@ -24,7 +24,7 @@ func TestSQL(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(f.Name())
+	defer os.Remove(f.Name()) // nolint:errcheck
 	if err = f.Close(); err != nil {
 		t.Fatal(err)
 	}
@@ -61,7 +61,7 @@ func TestSQL(t *testing.T) {
 	}}
 
 	for _, emp := range want {
-		_, err := db.ExecContext(ctx, "INSERT INTO employees (name, salary) VALUES ($1, $2)", emp.Name, emp.Salary)
+		_, err := db.ExecContext(ctx, "INSERT INTO employees (name, salary) VALUES (?1, ?2)", emp.Name, emp.Salary)
 		if err != nil {
 			t.Fatal(err)
 		}

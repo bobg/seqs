@@ -16,7 +16,7 @@ func TestWords(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer indep.Close()
+	defer indep.Close() // nolint:errcheck
 
 	words, errptr := Words(indep)
 	firstWords := Limit(words, 10)
